@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import org.plumelib.options.Option;
 import org.plumelib.options.OptionGroup;
 import org.plumelib.options.Options;
+import org.plumelib.util.EntryReader;
 import org.plumelib.util.RegexUtil;
 import org.plumelib.util.UtilPlume;
 
