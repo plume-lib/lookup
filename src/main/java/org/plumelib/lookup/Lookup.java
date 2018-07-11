@@ -213,8 +213,8 @@ public final class Lookup {
   /** Platform-specific line separator. */
   private static final String lineSep = System.getProperty("line.separator");
 
-  /** One line synopsis of usage. */
-  private static final String usage_string = "lookup [options] <keyword> ...";
+  /** One-line synopsis of usage. */
+  private static final String usageString = "lookup [options] <keyword> ...";
 
   /**
    * Look for the specified keywords in the file(s) and print the corresponding entries.
@@ -227,7 +227,7 @@ public final class Lookup {
   })
   public static void main(String[] args) throws IOException {
 
-    Options options = new Options(usage_string, Lookup.class);
+    Options options = new Options(usageString, Lookup.class);
     String[] keywords = options.parse(true, args);
 
     // If help was requested, print it and exit
@@ -238,11 +238,11 @@ public final class Lookup {
         System.out.println("Unable to find resource 'lookup.txt' with help text.");
         System.exit(1);
       }
-      BufferedReader help_stream = new BufferedReader(new InputStreamReader(is, UTF_8));
-      String line = help_stream.readLine();
+      BufferedReader helpStream = new BufferedReader(new InputStreamReader(is, UTF_8));
+      String line = helpStream.readLine();
       while (line != null) {
         System.out.println(line);
-        line = help_stream.readLine();
+        line = helpStream.readLine();
       }
       System.exit(0);
     }
@@ -270,14 +270,14 @@ public final class Lookup {
 
     // Open the first readable root file
     EntryReader reader = null;
-    String[] entry_files = entry_file.split(":");
-    List<Exception> file_errors = new ArrayList<Exception>();
-    for (String ef : entry_files) {
+    String[] entryFiles = entry_file.split(":");
+    List<Exception> fileErrors = new ArrayList<Exception>();
+    for (String ef : entryFiles) {
       ef = UtilPlume.expandFilename(ef);
       try {
         reader = new EntryReader(ef, comment_re, include_re);
       } catch (FileNotFoundException e) {
-        file_errors.add(e);
+        fileErrors.add(e);
       }
       if (reader != null) {
         break;
@@ -285,30 +285,30 @@ public final class Lookup {
     }
     if (reader == null) {
       System.out.println("Error: Can't read any entry files");
-      for (Exception file_error : file_errors) {
-        System.out.printf("  entry file %s%n", file_error.getMessage());
+      for (Exception fileError : fileErrors) {
+        System.out.printf("  entry file %s%n", fileError.getMessage());
       }
       System.exit(254);
     }
 
     // Setup the regular expressions for long entries
-    reader.set_entry_start_stop(entry_start_re, entry_stop_re);
+    reader.setEntryStartStop(entry_start_re, entry_stop_re);
 
-    List<EntryReader.Entry> matching_entries = new ArrayList<>();
+    List<EntryReader.Entry> matchingEntries = new ArrayList<>();
 
     try {
       // Process each entry looking for matches
-      int entry_cnt = 0;
-      EntryReader.Entry entry = reader.get_entry();
+      int entryCnt = 0;
+      EntryReader.Entry entry = reader.getEntry();
       while (entry != null) {
-        entry_cnt++;
-        if (verbose && ((entry_cnt % 1000) == 0)) {
-          System.out.printf("%d matches in %d entries\r", matching_entries.size(), entry_cnt);
+        entryCnt++;
+        if (verbose && ((entryCnt % 1000) == 0)) {
+          System.out.printf("%d matches in %d entries\r", matchingEntries.size(), entryCnt);
         }
         int matchcount = 0;
         for (String keyword : keywords) {
-          String search = entry.get_description(description_re);
-          if (search_body || entry.short_entry) {
+          String search = entry.getDescription(description_re);
+          if (search_body || entry.shortEntry) {
             search = entry.body;
           }
           if (!case_sensitive) {
@@ -333,8 +333,8 @@ public final class Lookup {
               keyword = keyword.toLowerCase();
             }
             if (word_match) {
-              String keyword_re = "\\b" + Pattern.quote(keyword) + "\\b";
-              if (Pattern.compile(keyword_re).matcher(search).find()) {
+              String keywordRegex = "\\b" + Pattern.quote(keyword) + "\\b";
+              if (Pattern.compile(keywordRegex).matcher(search).find()) {
                 matchcount++;
               }
             } else if (search.contains(keyword)) {
@@ -343,9 +343,9 @@ public final class Lookup {
           }
         }
         if (matchcount == keywords.length) {
-          matching_entries.add(entry);
+          matchingEntries.add(entry);
         }
-        entry = reader.get_entry();
+        entry = reader.getEntry();
       }
     } catch (FileNotFoundException e) {
       System.out.printf(
@@ -355,12 +355,12 @@ public final class Lookup {
     }
 
     // Print the results
-    if (matching_entries.size() == 0) {
+    if (matchingEntries.size() == 0) {
       System.out.println("Nothing found.");
-    } else if (matching_entries.size() == 1) {
-      EntryReader.Entry e = matching_entries.get(0);
+    } else if (matchingEntries.size() == 1) {
+      EntryReader.Entry e = matchingEntries.get(0);
       if (show_location) {
-        System.out.printf("%s:%d:%n", e.filename, e.line_number);
+        System.out.printf("%s:%d:%n", e.filename, e.lineNumber);
       }
       System.out.print(e.body);
     } else { // there must be multiple matches
@@ -369,41 +369,41 @@ public final class Lookup {
           System.out.printf("Illegal --item-num %d, should be positive%n", item_num);
           System.exit(1);
         }
-        if (item_num > matching_entries.size()) {
+        if (item_num > matchingEntries.size()) {
           System.out.printf(
-              "Illegal --item-num %d, should be <= %d%n", item_num, matching_entries.size());
+              "Illegal --item-num %d, should be <= %d%n", item_num, matchingEntries.size());
           System.exit(1);
         }
-        EntryReader.Entry e = matching_entries.get(item_num - 1);
+        EntryReader.Entry e = matchingEntries.get(item_num - 1);
         if (show_location) {
-          System.out.printf("%s:%d:%n", e.filename, e.line_number);
+          System.out.printf("%s:%d:%n", e.filename, e.lineNumber);
         }
         System.out.print(e.body);
       } else {
         int i = 0;
         if (print_all) {
           System.out.printf(
-              "%d matches found (separated by dashes below)%n", matching_entries.size());
+              "%d matches found (separated by dashes below)%n", matchingEntries.size());
         } else {
           System.out.printf(
               "%d matches found. Use -i to print a specific match or -a to see them all%n",
-              matching_entries.size());
+              matchingEntries.size());
         }
 
-        for (EntryReader.Entry e : matching_entries) {
+        for (EntryReader.Entry e : matchingEntries) {
           i++;
           if (print_all) {
             if (show_location) {
-              System.out.printf("%n-------------------------%n%s:%d:%n", e.filename, e.line_number);
+              System.out.printf("%n-------------------------%n%s:%d:%n", e.filename, e.lineNumber);
             } else {
               System.out.printf("%n-------------------------%n");
             }
             System.out.print(e.body);
           } else {
             if (show_location) {
-              System.out.printf("  -i=%d %s:%d: %s%n", i, e.filename, e.line_number, e.first_line);
+              System.out.printf("  -i=%d %s:%d: %s%n", i, e.filename, e.lineNumber, e.firstLine);
             } else {
-              System.out.printf("  -i=%d %s%n", i, e.get_description(description_re));
+              System.out.printf("  -i=%d %s%n", i, e.getDescription(description_re));
             }
           }
         }
@@ -418,7 +418,7 @@ public final class Lookup {
    * @return the next entry, or null
    * @throws IOException if there is a problem reading a file
    */
-  public static EntryReader./*@Nullable*/ Entry old_get_entry(EntryReader reader)
+  public static EntryReader./*@Nullable*/ Entry old_getEntry(EntryReader reader)
       throws IOException {
 
     try {
@@ -434,24 +434,24 @@ public final class Lookup {
 
       EntryReader.Entry entry = null;
       String filename = reader.getFileName();
-      long line_number = reader.getLineNumber();
+      long lineNumber = reader.getLineNumber();
 
       // If this is a long entry
       if (line.startsWith(">entry")) {
 
         // Get the current filename
-        String current_filename = reader.getFileName();
+        String currentFilename = reader.getFileName();
 
         // Remove '>entry' from the line
         line = line.replaceFirst("^>entry *", "");
-        String first_line = line;
+        String firstLine = line;
 
         StringBuilder body = new StringBuilder();
         // Read until we find the termination of the entry
         while ((line != null)
             && !line.startsWith(">entry")
             && !line.equals("<entry")
-            && current_filename.equals(reader.getFileName())) {
+            && currentFilename.equals(reader.getFileName())) {
           body.append(line);
           body.append(lineSep);
           line = reader.readLine();
@@ -460,15 +460,15 @@ public final class Lookup {
         // If this entry was terminated by the start of the next one,
         // put that line back
         if ((line != null)
-            && (line.startsWith(">entry") || !current_filename.equals(reader.getFileName()))) {
+            && (line.startsWith(">entry") || !currentFilename.equals(reader.getFileName()))) {
           reader.putback(line);
         }
 
-        entry = new EntryReader.Entry(first_line, body.toString(), filename, line_number, false);
+        entry = new EntryReader.Entry(firstLine, body.toString(), filename, lineNumber, false);
 
       } else { // blank separated entry
 
-        String first_line = line;
+        String firstLine = line;
 
         StringBuilder body = new StringBuilder();
         // Read until we find another blank line
@@ -478,7 +478,7 @@ public final class Lookup {
           line = reader.readLine();
         }
 
-        entry = new EntryReader.Entry(first_line, body.toString(), filename, line_number, true);
+        entry = new EntryReader.Entry(firstLine, body.toString(), filename, lineNumber, true);
       }
 
       return (entry);
@@ -498,7 +498,7 @@ public final class Lookup {
    * @param entry the entry whose first line to return
    * @return the first line of entry
    */
-  public static String first_line(String entry) {
+  public static String firstLine(String entry) {
 
     int ii = entry.indexOf(lineSep);
     if (ii == -1) {
