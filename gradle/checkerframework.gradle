@@ -58,12 +58,10 @@ dependencies {
 compileJava {
   doFirst {
     options.compilerArgs = [
-        '-processor', 'org.checkerframework.checker.nullness.NullnessChecker,org.checkerframework.checker.regex.RegexChecker',
+        '-processor', 'org.checkerframework.checker.formatter.FormatterChecker,org.checkerframework.checker.index.IndexChecker,org.checkerframework.checker.interning.InterningChecker,org.checkerframework.checker.lock.LockChecker,org.checkerframework.checker.nullness.NullnessChecker,org.checkerframework.checker.nullness.NullnessRawnessChecker,org.checkerframework.checker.regex.RegexChecker,org.checkerframework.checker.signature.SignatureChecker',
         '-Xmaxerrs', '10000',
         '-Xmaxwarns', '10000',
         // '-Awarns',      // turn Checker Framework errors into warnings
-	// Temporary, for debugging
-	'-verbose', '-XDTA:parser',
         '-AcheckPurityAnnotations',
         '-processorpath', "${configurations.checkerFrameworkCheckerJar.asPath}",
         "-Xbootclasspath/p:${configurations.checkerFrameworkAnnotatedJDK.asPath}"

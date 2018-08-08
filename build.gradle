@@ -23,8 +23,8 @@ repositories {
 apply from: "gradle/checkerframework.gradle"
 
 dependencies {
-    compile 'org.plumelib:options:0.3.3'
-    compile 'org.plumelib:plume-util:0.1.1'
+    compile 'org.plumelib:options:1.0.0'
+    compile 'org.plumelib:plume-util:1.0.0'
 }
 
 // Define the main class for the application
