@@ -10,17 +10,14 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.regex.qual.Regex;
 import org.plumelib.options.Option;
 import org.plumelib.options.OptionGroup;
 import org.plumelib.options.Options;
 import org.plumelib.util.EntryReader;
 import org.plumelib.util.RegexUtil;
 import org.plumelib.util.UtilPlume;
-
-/*>>>
-import org.checkerframework.checker.nullness.qual.*;
-import org.checkerframework.checker.regex.qual.*;
-*/
 
 /**
  * Lookup searches a set of files, much like {@code grep} does. However, Lookup searches by entry
@@ -187,7 +184,7 @@ public final class Lookup {
    * it starts counting at 1.
    */
   @Option("-i Choose a specific item when there are multiple matches; index is 1-based")
-  public static /*@Nullable*/ Integer item_num;
+  public static @Nullable Integer item_num;
 
   /** If true, show the filename/line number of each matching entry in the output. */
   @Option("-l Show the location of each matching entry")
@@ -195,20 +192,20 @@ public final class Lookup {
 
   @OptionGroup("Customizing format of files to be searched")
   @Option("Regex that denotes the start of a long entry")
-  public static /*@Regex(1)*/ Pattern entry_start_re = Pattern.compile("^>entry *()");
+  public static @Regex(1) Pattern entry_start_re = Pattern.compile("^>entry *()");
 
   @Option("Regex that denotes the end of a long entry")
   public static Pattern entry_stop_re = Pattern.compile("^<entry");
 
   @Option("Regex that finds an entry's description (for long entries)")
-  public static /*@Nullable*/ Pattern description_re = null;
+  public static @Nullable Pattern description_re = null;
 
   // If "", gets set to null immediately after option processing.
   @Option("Regex that matches an entire comment (not just a comment start)")
-  public static /*@Nullable*/ /*@Regex*/ String comment_re = "^%.*";
+  public static @Nullable @Regex String comment_re = "^%.*";
 
   @Option("Regex that matches an include directive; group 1 is the file name")
-  public static /*@Regex(1)*/ String include_re = "\\\\include\\{(.*)\\}";
+  public static @Regex(1) String include_re = "\\\\include\\{(.*)\\}";
 
   /** Platform-specific line separator. */
   private static final String lineSep = System.getProperty("line.separator");
@@ -418,8 +415,7 @@ public final class Lookup {
    * @return the next entry, or null
    * @throws IOException if there is a problem reading a file
    */
-  public static EntryReader./*@Nullable*/ Entry old_getEntry(EntryReader reader)
-      throws IOException {
+  public static EntryReader.@Nullable Entry old_getEntry(EntryReader reader) throws IOException {
 
     try {
 
