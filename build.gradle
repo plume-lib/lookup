@@ -19,9 +19,12 @@ repositories {
     mavenCentral()
 }
 
+// Checker Framework pluggable type-checking
+apply from: "gradle/checkerframework.gradle"
+
 dependencies {
-    compile 'org.plumelib:options:0.3.1'
-    compile 'org.plumelib:plume-util:0.1.0'
+    implementation 'org.plumelib:options:1.0.0'
+    implementation 'org.plumelib:plume-util:1.0.0'
 }
 
 // Define the main class for the application
