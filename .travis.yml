@@ -15,7 +15,7 @@ cache:
 jdk:
   - oraclejdk8
 
-script: ./gradlew build javadoc
+script: ./gradlew build javadoc && ./gradlew requireJavadoc
 
 git:
   depth: 9

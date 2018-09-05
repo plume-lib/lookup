@@ -128,6 +128,7 @@ public final class Lookup {
   @Option("-h Show detailed help information")
   public static boolean help = false;
 
+  /** Print progress information. */
   @Option("-v Print progress information")
   public static boolean verbose = false;
 
@@ -190,20 +191,25 @@ public final class Lookup {
   @Option("-l Show the location of each matching entry")
   public static boolean show_location = false;
 
+  /** Matches the start of a long entry. */
   @OptionGroup("Customizing format of files to be searched")
   @Option("Regex that denotes the start of a long entry")
   public static @Regex(1) Pattern entry_start_re = Pattern.compile("^>entry *()");
 
+  /** Matches the end of a long entry. */
   @Option("Regex that denotes the end of a long entry")
   public static Pattern entry_stop_re = Pattern.compile("^<entry");
 
+  /** Matches the description for a long entry. */
   @Option("Regex that finds an entry's description (for long entries)")
   public static @Nullable Pattern description_re = null;
 
   // If "", gets set to null immediately after option processing.
+  /** Matches an entire comment. */
   @Option("Regex that matches an entire comment (not just a comment start)")
   public static @Nullable @Regex String comment_re = "^%.*";
 
+  /** Matches an include directive; group 1 is the file name. */
   @Option("Regex that matches an include directive; group 1 is the file name")
   public static @Regex(1) String include_re = "\\\\include\\{(.*)\\}";
 
