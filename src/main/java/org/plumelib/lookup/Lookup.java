@@ -274,7 +274,7 @@ public final class Lookup {
     // Open the first readable root file
     EntryReader reader = null;
     String[] entryFiles = entry_file.split(":");
-    List<Exception> fileErrors = new ArrayList<Exception>();
+    List<Exception> fileErrors = new ArrayList<>();
     for (String ef : entryFiles) {
       ef = UtilPlume.expandFilename(ef);
       try {
