@@ -214,7 +214,7 @@ public final class Lookup {
   public static @Regex(1) String include_re = "\\\\include\\{(.*)\\}";
 
   /** Platform-specific line separator. */
-  private static final String lineSep = System.getProperty("line.separator");
+  private static final String lineSep = System.lineSeparator();
 
   /** One-line synopsis of usage. */
   private static final String usageString = "lookup [options] <keyword> ...";
