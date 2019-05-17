@@ -1,18 +1,10 @@
-// Checker Framework pluggable type-checking
-buildscript {
-  repositories {
-    mavenLocal()
-  }
-
-  dependencies {
-    classpath 'com.jaredsburrows:gradle-checker-framework-plugin:0.2.3-SNAPSHOT'
-  }
-}
-
 plugins {
   id 'application'
   id 'java'
   id 'com.github.johnrengelman.shadow' version '4.0.2'
+
+  // Checker Framework pluggable type-checking
+  id 'org.checkerframework' version '0.3.0'
 }
 
 // In this section you declare where to find the dependencies of your project
@@ -31,7 +23,7 @@ dependencies {
 mainClassName = 'org.plumelib.lookup.Lookup'
 
 // Checker Framework pluggable type-checking
-apply plugin: 'com.jaredsburrows.checkerframework'
+apply plugin: 'org.checkerframework'
 checkerFramework {
   checkers = [
     'org.checkerframework.checker.formatter.FormatterChecker',
