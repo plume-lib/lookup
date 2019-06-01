@@ -16,7 +16,7 @@ repositories {
 
 dependencies {
     implementation 'org.plumelib:options:1.0.1'
-    implementation 'org.plumelib:plume-util:1.0.4'
+    implementation 'org.plumelib:plume-util:1.0.6'
 }
 
 // Define the main class for the application
