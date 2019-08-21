@@ -4,7 +4,7 @@ plugins {
   id 'com.github.johnrengelman.shadow' version '5.1.0'
 
   // Checker Framework pluggable type-checking
-  id 'org.checkerframework' version '0.3.19'
+  id 'org.checkerframework' version '0.3.19' apply false
 }
 
 // In this section you declare where to find the dependencies of your project
@@ -42,6 +42,16 @@ checkerFramework {
   ]
 }
 
+// To use a local-built Checker Framework, run gradle with "-PcfLocal".
+if (project.hasProperty("cfLocal")) {
+  def cfHome = String.valueOf(System.getenv("CHECKERFRAMEWORK"))
+  dependencies {
+    compileOnly files(cfHome + "/checker/dist/checker-qual.jar")
+    testCompileOnly files(cfHome + "/checker/dist/checker-qual.jar")
+    checkerFramework files(cfHome + "/checker/dist/checker.jar")
+    checkerFrameworkAnnotatedJDK files(cfHome + "/checker/dist/jdk8.jar")
+  }
+}
 
 /// Javadoc
 
