@@ -61,7 +61,7 @@ import org.plumelib.util.UtilPlume;
  *         <li id="option:help"><b>-h</b> <b>--help=</b><i>boolean</i>. Show detailed help
  *             information and exit. [default false]
  *         <li id="option:verbose"><b>-v</b> <b>--verbose=</b><i>boolean</i>. Print progress
- *             information [default false]
+ *             information. [default false]
  *       </ul>
  *   <li id="optiongroup:Where-to-search">Where to search
  *       <ul>
@@ -100,16 +100,16 @@ import org.plumelib.util.UtilPlume;
  *   <li id="optiongroup:Customizing-format-of-files-to-be-searched">Customizing format of files to
  *       be searched
  *       <ul>
- *         <li id="option:entry-start-re"><b>--entry-start-re=</b><i>regex</i>. Regex that denotes
- *             the start of a long entry [default ^&gt;entry *()]
- *         <li id="option:entry-stop-re"><b>--entry-stop-re=</b><i>regex</i>. Regex that denotes the
- *             end of a long entry [default ^&lt;entry]
- *         <li id="option:description-re"><b>--description-re=</b><i>regex</i>. Regex that finds an
- *             entry's description (for long entries)
- *         <li id="option:comment-re"><b>--comment-re=</b><i>string</i>. Regex that matches an
- *             entire comment (not just a comment start) [default ^%.*]
- *         <li id="option:include-re"><b>--include-re=</b><i>string</i>. Regex that matches an
- *             include directive; group 1 is the file name [default \\include\{(.*)\}]
+ *         <li id="option:entry-start-re"><b>--entry-start-re=</b><i>regex</i>. Matches the start of
+ *             a long entry. [default ^&gt;entry *()]
+ *         <li id="option:entry-stop-re"><b>--entry-stop-re=</b><i>regex</i>. Matches the end of a
+ *             long entry. [default ^&lt;entry]
+ *         <li id="option:description-re"><b>--description-re=</b><i>regex</i>. Matches the
+ *             description for a long entry.
+ *         <li id="option:comment-re"><b>--comment-re=</b><i>string</i>. Matches an entire comment.
+ *             [default ^%.*]
+ *         <li id="option:include-re"><b>--include-re=</b><i>string</i>. Matches an include
+ *             directive; group 1 is the file name. [default \\include\{(.*)\}]
  *       </ul>
  * </ul>
  *
