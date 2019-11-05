@@ -1,6 +1,8 @@
 plugins {
   id 'java'
   id 'application'
+
+  // To create a fat jar build/libs/lookup-all.jar, run: ./gradlew shadowJar
   id 'com.github.johnrengelman.shadow' version '5.1.0'
 
   // Checker Framework pluggable type-checking
@@ -77,6 +79,7 @@ task requireJavadoc(type: Javadoc) {
   options.docletpath = project.sourceSets.main.compileClasspath as List
   options.doclet = "org.plumelib.javadoc.RequireJavadoc"
 }
+check.dependsOn requireJavadoc
 
 task updateUserOptions(type: Javadoc, dependsOn: 'assemble') {
   description "Updates printed documentation of command-line arguments."
@@ -91,7 +94,6 @@ task updateUserOptions(type: Javadoc, dependsOn: 'assemble') {
   options.addStringOption("i", "-quiet")
   title = ""
 }
-
 
 /// Emacs support
 
