@@ -5,6 +5,9 @@ plugins {
   // To create a fat jar build/libs/lookup-all.jar, run: ./gradlew shadowJar
   id 'com.github.johnrengelman.shadow' version '5.1.0'
 
+  // Error Prone linter
+  id("net.ltgt.errorprone") version "1.1.1"
+
   // Checker Framework pluggable type-checking
   id 'org.checkerframework' version '0.4.9' apply false
 }
@@ -19,6 +22,19 @@ dependencies {
 }
 
 mainClassName = 'org.plumelib.lookup.Lookup'
+
+/// Error Prone linter
+dependencies {
+  errorprone("com.google.errorprone:error_prone_core:2.3.4")
+  // JDK 8 support for Error Prone:
+  errorproneJavac("com.google.errorprone:javac:9+181-r4173-1")
+}
+tasks.withType(JavaCompile).configureEach {
+  options.compilerArgs << "-Xlint:all,-processing" << "-Werror"
+  options.errorprone {
+    disable("ReferenceEquality") // Use Interning Checker instead.
+  }
+}
 
 /// Checker Framework pluggable type-checking
 
