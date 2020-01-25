@@ -18,7 +18,7 @@ repositories {
 
 dependencies {
   implementation 'org.plumelib:options:1.0.3'
-  implementation 'org.plumelib:plume-util:1.0.10'
+  implementation 'org.plumelib:plume-util:1.0.11'
 }
 
 mainClassName = 'org.plumelib.lookup.Lookup'
