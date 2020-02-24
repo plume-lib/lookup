@@ -52,7 +52,7 @@ import org.plumelib.util.UtilPlume;
  *
  * <p>The default behavior can be customized by way of command-line options.
  *
- * <p>The <a name="command-line-options">command-line options</a> are as follows:
+ * <p>The <a id="command-line-options">command-line options</a> are as follows:
  * <!-- start options doc (DO NOT EDIT BY HAND) -->
  *
  * <ul>
