@@ -21,7 +21,9 @@ dependencies {
   implementation 'org.plumelib:plume-util:1.1.4'
 }
 
-mainClassName = 'org.plumelib.lookup.Lookup'
+application {
+  mainClassName = 'org.plumelib.lookup.Lookup'
+}
 
 /// Error Prone linter
 dependencies {
