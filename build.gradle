@@ -9,7 +9,7 @@ plugins {
   id("net.ltgt.errorprone") version "1.2.1"
 
   // Checker Framework pluggable type-checking
-  id 'org.checkerframework' version '0.5.12'
+  id 'org.checkerframework' version '0.5.13'
 }
 
 repositories {
@@ -18,7 +18,7 @@ repositories {
 
 dependencies {
   implementation 'org.plumelib:options:1.0.4'
-  implementation 'org.plumelib:plume-util:1.1.7'
+  implementation 'org.plumelib:plume-util:1.2.0'
 }
 
 application {
@@ -58,7 +58,7 @@ checkerFramework {
     '-Werror',
     '-AcheckPurityAnnotations',
     '-ArequirePrefixInWarningSuppressions',
-    '-AwarnUnneededSuppressions'
+    '-AwarnUnneededSuppressions',
   ]
 }
 
