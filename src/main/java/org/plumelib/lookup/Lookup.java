@@ -185,7 +185,7 @@ public final class Lookup {
    * it starts counting at 1.
    */
   @Option("-i Choose a specific item when there are multiple matches; index is 1-based")
-  public static @Nullable Integer item_num;
+  public static @Nullable Integer item_num = null;
 
   /** If true, show the filename/line number of each matching entry in the output. */
   @Option("-l Show the location of each matching entry")
