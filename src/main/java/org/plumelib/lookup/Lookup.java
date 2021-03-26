@@ -142,8 +142,7 @@ public final class Lookup {
    * Only the first file found is used, though it may itself contain include directives.
    */
   @OptionGroup("Where to search")
-  @Option(
-      "-f Specify the colon-separated search list of files of information; may only be supplied once")
+  @Option("-f The colon-separated search list of files of information; may only be supplied once")
   public static String entry_file = "~/lookup/root";
 
   /**
