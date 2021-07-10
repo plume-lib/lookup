@@ -1,12 +1,8 @@
 package org.plumelib.lookup;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -236,18 +232,7 @@ public final class Lookup {
 
     // If help was requested, print it and exit
     if (help) {
-      InputStream is = Lookup.class.getResourceAsStream("lookup.txt");
-      if (is == null) {
-        // This should never happen.
-        System.out.println("Unable to find resource 'lookup.txt' with help text.");
-        System.exit(1);
-      }
-      BufferedReader helpStream = new BufferedReader(new InputStreamReader(is, UTF_8));
-      String line = helpStream.readLine();
-      while (line != null) {
-        System.out.println(line);
-        line = helpStream.readLine();
-      }
+      options.printUsage();
       System.exit(0);
     }
 
