@@ -1,6 +1,5 @@
 package org.plumelib.lookup;
 
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -119,15 +118,6 @@ public final class Lookup {
     throw new Error("do not instantiate");
   }
 
-  /** Show detailed help information and exit. */
-  @OptionGroup("Getting help")
-  @Option("-h Show detailed help information")
-  public static boolean help = false;
-
-  /** Print progress information. */
-  @Option("-v Print progress information")
-  public static boolean verbose = false;
-
   // This uses only the first file because the default search path might be
   // something like user:system and you might want only your version of the
   // system files.  It might be useful to also support (via another flag,
@@ -207,6 +197,15 @@ public final class Lookup {
   /** Matches an include directive; group 1 is the file name. */
   @Option("Regex that matches an include directive; group 1 is the file name")
   public static @Regex(1) String include_re = "\\\\include\\{(.*)\\}";
+
+  /** Show detailed help information and exit. */
+  @OptionGroup("Getting help")
+  @Option("-h Show detailed help information")
+  public static boolean help = false;
+
+  /** Print progress information. */
+  @Option("-v Print progress information")
+  public static boolean verbose = false;
 
   /** Platform-specific line separator. */
   private static final String lineSep = System.lineSeparator();
