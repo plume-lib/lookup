@@ -17,7 +17,11 @@ repositories {
 }
 
 dependencies {
-  implementation 'org.plumelib:options:1.0.5'
+  if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
+    implementation 'org.plumelib:options:1.0.5'
+  } else {
+    implementation 'org.plumelib:options:2.0.0'
+  }
   implementation 'org.plumelib:plume-util:1.5.5'
 }
 
@@ -135,6 +139,7 @@ task updateUserOptions(type: Javadoc, dependsOn: 'assemble') {
   options.addStringOption("docfile", "${projectDir}/src/main/java/org/plumelib/lookup/Lookup.java")
   options.addStringOption("format", "javadoc")
   options.addStringOption("i", "-quiet")
+  options.noTimestamp(false)
   title = ""
 }
 
