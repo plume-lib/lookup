@@ -51,13 +51,6 @@ import org.plumelib.util.UtilPlume;
  * <!-- start options doc (DO NOT EDIT BY HAND) -->
  *
  * <ul>
- *   <li id="optiongroup:Getting-help">Getting help
- *       <ul>
- *         <li id="option:help"><b>-h</b> <b>--help=</b><i>boolean</i>. Show detailed help
- *             information and exit. [default: false]
- *         <li id="option:verbose"><b>-v</b> <b>--verbose=</b><i>boolean</i>. Print progress
- *             information. [default: false]
- *       </ul>
  *   <li id="optiongroup:Where-to-search">Where to search
  *       <ul>
  *         <li id="option:entry-file"><b>-f</b> <b>--entry-file=</b><i>string</i>. Specify the
@@ -105,6 +98,13 @@ import org.plumelib.util.UtilPlume;
  *             [default: ^%.*]
  *         <li id="option:include-re"><b>--include-re=</b><i>string</i>. Matches an include
  *             directive; group 1 is the file name. [default: \\include\{(.*)\}]
+ *       </ul>
+ *   <li id="optiongroup:Getting-help">Getting help
+ *       <ul>
+ *         <li id="option:help"><b>-h</b> <b>--help=</b><i>boolean</i>. Show detailed help
+ *             information and exit. [default: false]
+ *         <li id="option:verbose"><b>-v</b> <b>--verbose=</b><i>boolean</i>. Print progress
+ *             information. [default: false]
  *       </ul>
  * </ul>
  *
