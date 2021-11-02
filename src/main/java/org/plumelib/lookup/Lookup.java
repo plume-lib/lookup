@@ -416,7 +416,7 @@ public final class Lookup {
         line = reader.readLine();
       }
       if (line == null) {
-        return (null);
+        return null;
       }
 
       EntryReader.Entry entry = null;
@@ -468,14 +468,14 @@ public final class Lookup {
         entry = new EntryReader.Entry(firstLine, body.toString(), filename, lineNumber, true);
       }
 
-      return (entry);
+      return entry;
 
     } catch (FileNotFoundException e) {
       System.out.printf(
           "Error: Can't read %s at line %d in file %s%n",
           e.getMessage(), reader.getLineNumber(), reader.getFileName());
       System.exit(254);
-      return (null);
+      return null;
     }
   }
 
