@@ -3,7 +3,7 @@ plugins {
   id 'application'
 
   // To create a fat jar build/libs/lookup-all.jar, run: ./gradlew shadowJar
-  id 'com.github.johnrengelman.shadow' version '7.1.1'
+  id 'com.github.johnrengelman.shadow' version '7.1.2'
 
   // Error Prone linter
   id("net.ltgt.errorprone") version "2.0.2"
