@@ -48,21 +48,22 @@ apply plugin: 'org.checkerframework'
 
 checkerFramework {
   checkers = [
-    'org.checkerframework.checker.formatter.FormatterChecker',
-    'org.checkerframework.checker.index.IndexChecker',
-    'org.checkerframework.checker.interning.InterningChecker',
-    'org.checkerframework.checker.lock.LockChecker',
-    'org.checkerframework.checker.nullness.NullnessChecker',
-    'org.checkerframework.checker.regex.RegexChecker',
-    'org.checkerframework.checker.signature.SignatureChecker',
-    'org.checkerframework.checker.signedness.SignednessChecker',
-    'org.checkerframework.common.initializedfields.InitializedFieldsChecker'
+          'org.checkerframework.checker.formatter.FormatterChecker',
+          'org.checkerframework.checker.index.IndexChecker',
+          'org.checkerframework.checker.interning.InterningChecker',
+          'org.checkerframework.checker.lock.LockChecker',
+          'org.checkerframework.checker.nullness.NullnessChecker',
+          'org.checkerframework.checker.regex.RegexChecker',
+          'org.checkerframework.checker.signature.SignatureChecker',
+          'org.checkerframework.checker.signedness.SignednessChecker',
+          'org.checkerframework.common.initializedfields.InitializedFieldsChecker',
+          'org.checkerframework.checker.resourceleak.ResourceLeakChecker'
   ]
   extraJavacArgs = [
-    '-Werror',
-    '-AcheckPurityAnnotations',
-    '-ArequirePrefixInWarningSuppressions',
-    '-AwarnUnneededSuppressions',
+          '-Werror',
+          '-AcheckPurityAnnotations',
+          '-ArequirePrefixInWarningSuppressions',
+          '-AwarnUnneededSuppressions',
   ]
 }
 
@@ -83,13 +84,13 @@ javadoc {
   options.addStringOption('Xwerror', '-Xdoclint:all')
   options.addStringOption('private', '-quiet')
   if (JavaVersion.current().compareTo(org.gradle.api.JavaVersion.VERSION_1_9) >= 0) {
-      options.addStringOption("-release", "8");
+    options.addStringOption("-release", "8");
   }
   doLast {
     if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
       ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:'',
-	flags:'g', byline:true) {
-	fileset(dir: destinationDir)
+              flags:'g', byline:true) {
+        fileset(dir: destinationDir)
       }
     }
   }
@@ -102,13 +103,13 @@ task javadocWeb(type: Javadoc) {
   destinationDir = file("/cse/web/research/plumelib/${project.name}/api")
   classpath = project.sourceSets.main.compileClasspath
   if (JavaVersion.current().compareTo(org.gradle.api.JavaVersion.VERSION_1_9) >= 0) {
-      options.addStringOption("-release", "8");
+    options.addStringOption("-release", "8");
   }
   doLast {
     if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
       ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:'',
-	flags:'g', byline:true) {
-	fileset(dir: destinationDir)
+              flags:'g', byline:true) {
+        fileset(dir: destinationDir)
       }
     }
   }
