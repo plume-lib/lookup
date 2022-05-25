@@ -360,7 +360,7 @@ public final class Lookup {
         }
         if (item_num > matchingEntries.size()) {
           System.out.printf(
-                  "Illegal --item-num %d, should be <= %d%n", item_num, matchingEntries.size());
+              "Illegal --item-num %d, should be <= %d%n", item_num, matchingEntries.size());
           System.exit(1);
         }
         EntryReader.Entry e = matchingEntries.get(item_num - 1);
@@ -372,11 +372,11 @@ public final class Lookup {
         int i = 0;
         if (print_all) {
           System.out.printf(
-                  "%d matches found (separated by dashes below)%n", matchingEntries.size());
+              "%d matches found (separated by dashes below)%n", matchingEntries.size());
         } else {
           System.out.printf(
-                  "%d matches found. Use -i to print a specific match or -a to see them all%n",
-                  matchingEntries.size());
+              "%d matches found. Use -i to print a specific match or -a to see them all%n",
+              matchingEntries.size());
         }
 
         for (EntryReader.Entry e : matchingEntries) {
