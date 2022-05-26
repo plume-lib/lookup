@@ -400,7 +400,9 @@ public final class Lookup {
         }
       }
     } finally {
-      reader.close();
+      if (reader != null) {
+        reader.close();
+      }
     }
   }
 
