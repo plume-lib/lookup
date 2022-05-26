@@ -57,7 +57,7 @@ checkerFramework {
     'org.checkerframework.checker.signature.SignatureChecker',
     'org.checkerframework.checker.signedness.SignednessChecker',
     'org.checkerframework.common.initializedfields.InitializedFieldsChecker',
-    'org.checker.framework.checker.resourceleak.ResourceLeakChecker'
+    'org.checkerframework.checker.resourceleak.ResourceLeakChecker'
   ]
   extraJavacArgs = [
     '-Werror',
