@@ -2,7 +2,7 @@ plugins {
   id 'java'
   id 'application'
 
-  // To create a fat jar build/libs/lookup-all.jar, run: ./gradlew shadowJar
+  // To create a fat jar build/libs/...-all.jar, run: ./gradlew shadowJar
   id 'com.github.johnrengelman.shadow' version '7.1.2'
 
   // Code formatting; defines targets "spotlessApply" and "spotlessCheck"
@@ -32,6 +32,10 @@ application {
   mainClass = 'org.plumelib.lookup.Lookup'
 }
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+
 spotless {
   format 'misc', {
     // define the files to apply `misc` to
@@ -55,6 +59,7 @@ dependencies {
   errorprone("com.google.errorprone:error_prone_core:2.16")
 }
 tasks.withType(JavaCompile).configureEach {
+  // "-processing" avoids javac warning "No processor claimed any of these annotations".
   options.compilerArgs << "-Xlint:all,-processing" << "-Werror"
   options.errorprone {
     enabled = JavaVersion.current() != JavaVersion.VERSION_1_8
