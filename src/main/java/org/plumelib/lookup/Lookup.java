@@ -37,7 +37,7 @@ import org.plumelib.util.UtilPlume;
  *       only the first line of a long entry.
  * </ul>
  *
- * If multiple entries match, the first line of each is printed. If only one entry matches, then
+ * <p>If multiple entries match, the first line of each is printed. If only one entry matches, then
  * that entry is printed in its entirety.
  *
  * <p>By default, Lookup searches the file ~/lookup/root. Files can contain comments and can include
