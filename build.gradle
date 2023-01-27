@@ -126,7 +126,7 @@ javadoc {
   }
   doLast {
     ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:'',
-      flags:'g', byline:true) {
+    flags:'g', byline:true) {
       fileset(dir: destinationDir)
     }
   }
@@ -143,7 +143,7 @@ task javadocWeb(type: Javadoc) {
   }
   doLast {
     ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:'',
-      flags:'g', byline:true) {
+    flags:'g', byline:true) {
       fileset(dir: destinationDir)
     }
   }
