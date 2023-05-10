@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.regex.qual.Regex;
@@ -301,7 +302,7 @@ public final class Lookup {
               search = entry.body;
             }
             if (!case_sensitive) {
-              search = search.toLowerCase();
+              search = search.toLowerCase(Locale.getDefault());
             }
             if (regular_expressions) {
               int flags = Pattern.CASE_INSENSITIVE;
@@ -319,7 +320,7 @@ public final class Lookup {
               }
             } else {
               if (!case_sensitive) {
-                keyword = keyword.toLowerCase();
+                keyword = keyword.toLowerCase(Locale.getDefault());
               }
               if (word_match) {
                 String keywordRegex = "\\b" + Pattern.quote(keyword) + "\\b";
