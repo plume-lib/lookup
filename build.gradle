@@ -22,7 +22,7 @@ repositories {
 
 dependencies {
   implementation 'org.plumelib:options:2.0.3'
-  implementation 'org.plumelib:plume-util:1.7.0'
+  implementation 'org.plumelib:plume-util:1.8.1'
 }
 
 application {
