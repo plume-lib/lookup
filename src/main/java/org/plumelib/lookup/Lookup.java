@@ -12,8 +12,8 @@ import org.plumelib.options.Option;
 import org.plumelib.options.OptionGroup;
 import org.plumelib.options.Options;
 import org.plumelib.util.EntryReader;
+import org.plumelib.util.FilesPlume;
 import org.plumelib.util.RegexUtil;
-import org.plumelib.util.UtilPlume;
 
 /**
  * Lookup searches a set of files, much like {@code grep} does. However, Lookup searches by entry
@@ -263,7 +263,7 @@ public final class Lookup {
       String[] entryFiles = entry_file.split(":");
       List<Exception> fileErrors = new ArrayList<>();
       for (String ef : entryFiles) {
-        ef = UtilPlume.expandFilename(ef);
+        ef = FilesPlume.expandFilename(ef);
         try {
           reader = new EntryReader(ef, comment_re, include_re);
         } catch (FileNotFoundException e) {
