@@ -25,7 +25,7 @@ ext.errorproneVersion = '2.26.1'
 
 dependencies {
   implementation 'org.plumelib:options:2.0.3'
-  implementation 'org.plumelib:plume-util:1.9.2'
+  implementation 'org.plumelib:plume-util:1.9.3'
 
   compileOnly "com.google.errorprone:error_prone_annotations:${errorproneVersion}"
 }
