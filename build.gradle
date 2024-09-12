@@ -21,13 +21,13 @@ repositories {
   maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 }
 
-ext.errorproneVersion = '2.31.0'
+ext.errorproneVersion = '2.32.0'
+
+ext.isJava17orHigher = JavaVersion.current() >= JavaVersion.VERSION_17
 
 dependencies {
   implementation 'org.plumelib:options:2.0.3'
   implementation 'org.plumelib:plume-util:1.9.3'
-
-  compileOnly "com.google.errorprone:error_prone_annotations:${errorproneVersion}"
 }
 
 application {
@@ -75,6 +75,7 @@ tasks.withType(JavaCompile).configureEach {
     disable('ExtendsObject')  // Incorrect when using the Checker Framework
     disable('ReferenceEquality') // Use Interning Checker instead.
   }
+  options.errorprone.enabled = isJava17orHigher
 }
 
 // Checker Framework pluggable type-checking
