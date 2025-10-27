@@ -304,7 +304,7 @@ public final class Lookup {
         }
       } else if (!case_sensitive) {
         for (int i = 0; i < keywords.length; i++) {
-          keywords[i] = keywords[i].toLowerCase(Locale.getDefault());
+          keywords[i] = keywords[i].toLowerCase(Locale.ROOT);
         }
       }
 
@@ -320,7 +320,7 @@ public final class Lookup {
           String toSearch =
               (search_body || entry.shortEntry) ? entry.body : entry.getDescription(description_re);
           if (!case_sensitive) {
-            toSearch = toSearch.toLowerCase(Locale.getDefault());
+            toSearch = toSearch.toLowerCase(Locale.ROOT);
           }
           boolean found = true;
           if (!patterns.isEmpty()) {
