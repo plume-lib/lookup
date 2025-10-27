@@ -411,15 +411,12 @@ public final class Lookup {
   }
 
   /**
-   * Returns true if the string is null or contains only whitespace.
+   * Returns true if the string contains only whitespace.
    *
    * @param str a string
-   * @return true if the string is null or contains only whitespace.
+   * @return true if the string contains only whitespace.
    */
-  private static boolean isWhitespaceOrNull(@Nullable String str) {
-    if (str == null) {
-      return true;
-    }
+  private static boolean isWhitespace(String str) {
     for (int i = 0; i < str.length(); i++) {
       if (!Character.isWhitespace(str.charAt(i))) {
         return false;
@@ -441,7 +438,7 @@ public final class Lookup {
 
       // Skip any preceeding blank lines
       String line = reader.readLine();
-      while (isWhitespaceOrNull(line)) {
+      while (line != null && isWhitespace(line)) {
         line = reader.readLine();
       }
       if (line == null) {
@@ -488,7 +485,7 @@ public final class Lookup {
 
         StringBuilder body = new StringBuilder();
         // Read until we find another blank line
-        while (!isWhitespaceOrNull(line)) {
+        while (line != null && !isWhitespace(line)) {
           body.append(line);
           body.append(lineSep);
           line = reader.readLine();
