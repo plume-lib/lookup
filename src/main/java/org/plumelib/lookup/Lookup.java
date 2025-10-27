@@ -285,7 +285,6 @@ public final class Lookup {
 
       // Precompute the regular expressions, for efficiency.
       int flags = case_sensitive ? 0 : (Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-      // Optional: make \b and \w Unicode-aware when using word boundaries
       if (word_match) {
         flags |= Pattern.UNICODE_CHARACTER_CLASS;
       }
