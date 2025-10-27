@@ -2,6 +2,8 @@ package org.plumelib.lookup;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -257,34 +259,54 @@ public final class Lookup {
       comment_re = null;
     }
 
-    // Open the first readable root file
-    EntryReader reader = null;
-    try {
-      String[] entryFiles = entry_file.split(":");
-      List<Exception> fileErrors = new ArrayList<>();
-      for (String ef : entryFiles) {
-        ef = FilesPlume.expandFilename(ef);
-        try {
-          reader = new EntryReader(ef, comment_re, include_re);
-        } catch (FileNotFoundException e) {
-          fileErrors.add(e);
-        }
-        if (reader != null) {
-          break;
-        }
+    // Find the first readable root file.
+    String rootFile = null;
+    for (String candidate_unexpanded : entry_file.split(":")) {
+      String candidate = FilesPlume.expandFilename(candidate_unexpanded);
+      if (Files.isReadable(Path.of(candidate))) {
+        rootFile = candidate;
+        break;
       }
-      if (reader == null) {
-        System.out.println("Error: Can't read any entry files");
-        for (Exception fileError : fileErrors) {
-          System.out.printf("  entry file %s%n", fileError.getMessage());
-        }
-        System.exit(254);
+    }
+    if (rootFile == null) {
+      System.out.println("Error: Can't read any entry files.");
+      for (String unreadable : entry_file.split(":")) {
+        System.out.printf("  entry file %s%n", FilesPlume.expandFilename(unreadable));
       }
+      System.exit(254);
+    }
 
-      // Setup the regular expressions for long entries
+    try (EntryReader reader = new EntryReader(rootFile, comment_re, include_re)) {
+
+      // Set up the regular expressions for long entries.
       reader.setEntryStartStop(entry_start_re, entry_stop_re);
 
       List<EntryReader.Entry> matchingEntries = new ArrayList<>();
+
+      // Precompute the regular expressions, for efficiency.
+      int flags = Pattern.CASE_INSENSITIVE;
+      if (case_sensitive) {
+        flags = 0;
+      }
+      List<Pattern> patterns = new ArrayList<>();
+      if (regular_expressions) {
+        for (String keyword : keywords) {
+          if (!RegexUtil.isRegex(keyword)) {
+            System.out.println("Error: not a regex: " + keyword);
+            System.exit(254);
+          }
+          patterns.add(Pattern.compile(keyword, flags));
+        }
+      } else if (word_match) {
+        for (String keyword : keywords) {
+          String keywordRegex = "\\b" + Pattern.quote(keyword) + "\\b";
+          patterns.add(Pattern.compile(keywordRegex, flags));
+        }
+      } else if (!case_sensitive) {
+        for (int i = 0; i < keywords.length; i++) {
+          keywords[i] = keywords[i].toLowerCase(Locale.getDefault());
+        }
+      }
 
       try {
         // Process each entry looking for matches
@@ -295,44 +317,28 @@ public final class Lookup {
           if (verbose && ((entryCnt % 1000) == 0)) {
             System.out.printf("%d matches in %d entries\r", matchingEntries.size(), entryCnt);
           }
-          int matchcount = 0;
-          for (String keyword : keywords) {
-            String search = entry.getDescription(description_re);
-            if (search_body || entry.shortEntry) {
-              search = entry.body;
+          String toSearch =
+              (search_body || entry.shortEntry) ? entry.body : entry.getDescription(description_re);
+          if (!case_sensitive) {
+            toSearch = toSearch.toLowerCase(Locale.getDefault());
+          }
+          boolean found = true;
+          if (!patterns.isEmpty()) {
+            for (Pattern pattern : patterns) {
+              if (!pattern.matcher(toSearch).find()) {
+                found = false;
+                break;
+              }
             }
-            if (!case_sensitive) {
-              search = search.toLowerCase(Locale.getDefault());
-            }
-            if (regular_expressions) {
-              int flags = Pattern.CASE_INSENSITIVE;
-              if (case_sensitive) {
-                flags = 0;
-              }
-
-              if (!RegexUtil.isRegex(keyword)) {
-                System.out.println("Error: not a regex: " + keyword);
-                System.exit(254);
-              }
-
-              if (Pattern.compile(keyword, flags).matcher(search).find()) {
-                matchcount++;
-              }
-            } else {
-              if (!case_sensitive) {
-                keyword = keyword.toLowerCase(Locale.getDefault());
-              }
-              if (word_match) {
-                String keywordRegex = "\\b" + Pattern.quote(keyword) + "\\b";
-                if (Pattern.compile(keywordRegex).matcher(search).find()) {
-                  matchcount++;
-                }
-              } else if (search.contains(keyword)) {
-                matchcount++;
+          } else {
+            for (String keyword : keywords) {
+              if (!toSearch.contains(keyword)) {
+                found = false;
+                break;
               }
             }
           }
-          if (matchcount == keywords.length) {
+          if (found) {
             matchingEntries.add(entry);
           }
           entry = reader.getEntry();
@@ -399,10 +405,6 @@ public final class Lookup {
             }
           }
         }
-      }
-    } finally {
-      if (reader != null) {
-        reader.close();
       }
     }
   }
