@@ -284,9 +284,9 @@ public final class Lookup {
       List<EntryReader.Entry> matchingEntries = new ArrayList<>();
 
       // Precompute the regular expressions, for efficiency.
-      int flags = Pattern.CASE_INSENSITIVE;
-      if (case_sensitive) {
-        flags = 0;
+      int flags = case_sensitive ? 0 : (Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+      if (word_match) {
+        flags |= Pattern.UNICODE_CHARACTER_CLASS;
       }
       List<Pattern> patterns = new ArrayList<>();
       if (regular_expressions) {
@@ -304,7 +304,7 @@ public final class Lookup {
         }
       } else if (!case_sensitive) {
         for (int i = 0; i < keywords.length; i++) {
-          keywords[i] = keywords[i].toLowerCase(Locale.getDefault());
+          keywords[i] = keywords[i].toLowerCase(Locale.ROOT);
         }
       }
 
@@ -320,9 +320,6 @@ public final class Lookup {
           }
           String toSearch =
               (search_body || entry.shortEntry) ? entry.body : entry.getDescription(description_re);
-          if (!case_sensitive) {
-            toSearch = toSearch.toLowerCase(Locale.getDefault());
-          }
           boolean found = true;
           if (!patterns.isEmpty()) {
             for (Pattern pattern : patterns) {
@@ -332,6 +329,9 @@ public final class Lookup {
               }
             }
           } else {
+            if (!case_sensitive) {
+              toSearch = toSearch.toLowerCase(Locale.ROOT);
+            }
             for (String keyword : keywords) {
               if (!toSearch.contains(keyword)) {
                 found = false;
