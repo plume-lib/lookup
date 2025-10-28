@@ -155,9 +155,9 @@ public final class Lookup {
 
   /**
    * If true, match a text keyword only as a separate word, not as a substring of a word. This
-   * option is ignored if regular_expressions is true.
+   * option may be supplied together with {@code --regular-expressions}.
    */
-  @Option("-w Only match text keywords against complete words")
+  @Option("-w Only match search terms against complete words")
   public static boolean word_match = false;
 
   /**
