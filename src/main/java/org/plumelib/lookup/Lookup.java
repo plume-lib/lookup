@@ -421,7 +421,7 @@ public final class Lookup {
 
     try {
 
-      // Skip any preceeding blank lines.
+      // Skip any preceding blank lines.
       String line = reader.readLine();
       while (line != null && line.isBlank()) {
         line = reader.readLine();
