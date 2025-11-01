@@ -345,7 +345,7 @@ public final class Lookup {
       }
 
       // Print the results
-      if (matchingEntries.size() == 0) {
+      if (matchingEntries.isEmpty()) {
         System.out.println("Nothing found.");
       } else if (matchingEntries.size() == 1) {
         EntryReader.Entry e = matchingEntries.get(0);
