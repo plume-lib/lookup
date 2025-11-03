@@ -155,9 +155,9 @@ public final class Lookup {
 
   /**
    * If true, match a text keyword only as a separate word, not as a substring of a word. This
-   * option is ignored if regular_expressions is true.
+   * option may be supplied together with {@code --regular-expressions}.
    */
-  @Option("-w Only match text keywords against complete words")
+  @Option("-w Only match search terms against complete words")
   public static boolean word_match = false;
 
   /**
@@ -311,6 +311,7 @@ public final class Lookup {
       try {
         // Process each entry looking for matches
         int entryCnt = 0;
+
         EntryReader.Entry entry = reader.getEntry();
         while (entry != null) {
           entryCnt++;
@@ -351,23 +352,24 @@ public final class Lookup {
       }
 
       // Print the results
-      if (matchingEntries.isEmpty()) {
+      int numMatchingEntries = matchingEntries.size();
+      if (numMatchingEntries == 0) {
         System.out.println("Nothing found.");
-      } else if (matchingEntries.size() == 1) {
+      } else if (numMatchingEntries == 1) {
         EntryReader.Entry e = matchingEntries.get(0);
         if (show_location) {
           System.out.printf("%s:%d:%n", e.filename, e.lineNumber);
         }
         System.out.print(e.body);
-      } else { // there must be multiple matches
+      } else { // there are multiple matches
         if (item_num != null) {
           if (item_num < 1) {
             System.out.printf("Illegal --item-num %d, should be positive%n", item_num);
             System.exit(1);
           }
-          if (item_num > matchingEntries.size()) {
+          if (item_num > numMatchingEntries) {
             System.out.printf(
-                "Illegal --item-num %d, should be <= %d%n", item_num, matchingEntries.size());
+                "Illegal --item-num %d, should be <= %d%n", item_num, numMatchingEntries);
             System.exit(1);
           }
           EntryReader.Entry e = matchingEntries.get(item_num - 1);
@@ -378,12 +380,11 @@ public final class Lookup {
         } else {
           int i = 0;
           if (print_all) {
-            System.out.printf(
-                "%d matches found (separated by dashes below)%n", matchingEntries.size());
+            System.out.printf("%d matches found (separated by dashes below)%n", numMatchingEntries);
           } else {
             System.out.printf(
-                "%d matches found. Use -i to print a specific match or -a to see them all%n",
-                matchingEntries.size());
+                "%d matches found. Use -i to print a specific match or -a to see them all.%n",
+                numMatchingEntries);
           }
 
           for (EntryReader.Entry e : matchingEntries) {
@@ -420,16 +421,16 @@ public final class Lookup {
 
     try {
 
-      // Skip any preceeding blank lines
+      // Skip any preceding blank lines.
       String line = reader.readLine();
-      while ((line != null) && (line.trim().length() == 0)) {
+      while (line != null && line.isBlank()) {
         line = reader.readLine();
       }
       if (line == null) {
         return null;
       }
 
-      EntryReader.Entry entry = null;
+      EntryReader.Entry entry;
       String filename = reader.getFileName();
       long lineNumber = reader.getLineNumber();
 
@@ -468,8 +469,8 @@ public final class Lookup {
         String firstLine = line;
 
         StringBuilder body = new StringBuilder();
-        // Read until we find another blank line
-        while ((line != null) && (line.trim().length() != 0)) {
+        // Read until we find another blank line.
+        while (line != null && !line.isBlank()) {
           body.append(line);
           body.append(lineSep);
           line = reader.readLine();
