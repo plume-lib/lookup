@@ -178,7 +178,7 @@ public final class Lookup {
   @Option("-l Show the location of each matching entry")
   public static boolean show_location = false;
 
-  /** Matches the start of a long entry. */
+  /** If true, entries are separated by two blank lines. */
   @OptionGroup("Customizing format of files to be searched")
   @Option("If true, entries are separated by two blank lines")
   public static boolean two_blank_lines = false;
