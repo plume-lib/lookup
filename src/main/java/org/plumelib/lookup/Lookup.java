@@ -32,21 +32,20 @@ import org.plumelib.util.RegexUtil;
  * <p>A file can contain one or more entries, each of which is a short entry or a long entry.
  *
  * <ul>
- *   <li>A short entry is a single paragraph (delimited from the next entry by a blank line). Lookup
- *       searches all of a short entry.
+ *   <li>A short entry is a single paragraph (delimited from the next entry by one or two blank
+ *       lines (default: 1). Lookup searches all of a short entry.
  *   <li>A long entry is introduced by a line that begins with '{@code >entry}'. The remainder of
  *       that line is a one-line description of the entry. A long entry is terminated by '{@code
  *       <entry}', by the start of a new long entry, or by the start of a new file. Lookup searches
  *       only the first line of a long entry.
  * </ul>
  *
- * <p>If multiple entries match, the first line of each is printed. If only one entry matches, then
- * that entry is printed in its entirety.
+ * <p>All matching entries are printed.
  *
  * <p>By default, Lookup searches the file ~/lookup/root. Files can contain comments and can include
- * other files. Comments start with a % sign in the first column. Any comment line is ignored (it is
- * not treated as a blank line for the purpose of separating entries). A file can include another
- * file via a line of the form '\include{filename}'.
+ * other files. Comments start with a % sign in the first column by default. Any comment line is
+ * ignored. A comment line does not separate entries as a blank line does. A file can include
+ * another file via a line of the form '\include{filename}'.
  *
  * <p>The default behavior can be customized by way of command-line options.
  *
@@ -179,8 +178,12 @@ public final class Lookup {
   @Option("-l Show the location of each matching entry")
   public static boolean show_location = false;
 
-  /** Matches the start of a long entry. */
+  /** If true, entries are separated by two blank lines. */
   @OptionGroup("Customizing format of files to be searched")
+  @Option("If true, entries are separated by two blank lines")
+  public static boolean two_blank_lines = false;
+
+  /** Matches the start of a long entry. */
   @Option("Regex that denotes the start of a long entry")
   public static @Regex(1) Pattern entry_start_re = Pattern.compile("^>entry *()");
 
@@ -276,7 +279,7 @@ public final class Lookup {
       System.exit(254);
     }
 
-    try (EntryReader reader = new EntryReader(rootFile, comment_re, include_re)) {
+    try (EntryReader reader = new EntryReader(rootFile, two_blank_lines, comment_re, include_re)) {
 
       // Set up the regular expressions for long entries.
       reader.setEntryStartStop(entry_start_re, entry_stop_re);
