@@ -33,7 +33,7 @@ ext {
 
 dependencies {
   implementation("org.plumelib:options:2.0.3")
-  implementation("org.plumelib:plume-util:1.11.0")
+  implementation("org.plumelib:plume-util:1.12.1")
 }
 
 application {

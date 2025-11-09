@@ -180,6 +180,10 @@ public final class Lookup {
 
   /** Matches the start of a long entry. */
   @OptionGroup("Customizing format of files to be searched")
+  @Option("If true, entries are separated by two blank lines")
+  public static boolean two_blank_lines = false;
+
+  /** Matches the start of a long entry. */
   @Option("Regex that denotes the start of a long entry")
   public static @Regex(1) Pattern entry_start_re = Pattern.compile("^>entry *()");
 
@@ -275,7 +279,7 @@ public final class Lookup {
       System.exit(254);
     }
 
-    try (EntryReader reader = new EntryReader(rootFile, comment_re, include_re)) {
+    try (EntryReader reader = new EntryReader(rootFile, two_blank_lines, comment_re, include_re)) {
 
       // Set up the regular expressions for long entries.
       reader.setEntryStartStop(entry_start_re, entry_stop_re);
