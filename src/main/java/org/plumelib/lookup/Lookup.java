@@ -225,9 +225,6 @@ public final class Lookup {
    * @param args command-line arguments; see documentation
    * @throws IOException if there is a problem reading a file
    */
-  @SuppressWarnings({
-    "StringSplitter" // don't add dependence on Guava
-  })
   public static void main(String[] args) throws IOException {
 
     Options options = new Options(usageString, Lookup.class);
@@ -264,7 +261,7 @@ public final class Lookup {
 
     // Find the first readable root file.
     String rootFile = null;
-    for (String candidate_unexpanded : entry_file.split(":")) {
+    for (String candidate_unexpanded : entry_file.split(":", -1)) {
       String candidate = FilesPlume.expandFilename(candidate_unexpanded);
       if (Files.isReadable(Path.of(candidate))) {
         rootFile = candidate;
@@ -273,7 +270,7 @@ public final class Lookup {
     }
     if (rootFile == null) {
       System.out.println("Error: Can't read any entry files.");
-      for (String unreadable : entry_file.split(":")) {
+      for (String unreadable : entry_file.split(":", -1)) {
         System.out.printf("  entry file %s%n", FilesPlume.expandFilename(unreadable));
       }
       System.exit(254);
