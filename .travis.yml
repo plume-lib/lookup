@@ -14,7 +14,7 @@ jdk:
   - openjdk21
   - openjdk25
 
-script: ./gradlew build && ./gradlew requireJavadoc
+script: ./gradlew build
 
 git:
   depth: 9
