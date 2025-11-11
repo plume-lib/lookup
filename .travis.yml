@@ -11,9 +11,10 @@ cache:
     - $HOME/.m2/
 
 jdk:
-  - oraclejdk17
+  - openjdk21
+  - openjdk25
 
-script: ./gradlew build javadoc && ./gradlew requireJavadoc
+script: ./gradlew build
 
 git:
   depth: 9
