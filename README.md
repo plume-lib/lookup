@@ -4,12 +4,12 @@ Lookup searches a set of files, much like grep does.  However, Lookup has additi
 
 * It searches by entry rather than by line.  By default, an entry is a paragraph, which may be separated by one or two blank lines.
 * It respects comments, ignoring matches within them.
-* It respects `\include` directives (it searches the named file)
+* It respects `\include` directives (it searches the named file).
 * and more.
 
 ## Installation
 
-1. Create file `lookup/build/libs/lookup-all.jar`.
+1. Create file `lookup/build/libs/lookup-all.jar` by running these commands:
 
    ```sh
    git clone https://github.com/plume-lib/lookup.git
@@ -17,7 +17,7 @@ Lookup searches a set of files, much like grep does.  However, Lookup has additi
    ./gradlew -q assemble
    ```
 
-2. Add aliases to your shell startup file (e.g., `~/.bash_profile`).
+2. Add aliases to your shell startup file (e.g., `~/.bash_profile`):
 
    ```sh
    alias lookup='java -ea -jar SOMEDIRECTORY/lookup/build/libs/lookup-all.jar -a'
@@ -33,7 +33,8 @@ Lookup searches a set of files, much like grep does.  However, Lookup has additi
 
 ## Usage examples
 
-See the [uwisdom](https://github.com/mernst/uwisdom) project.
+See the [uwisdom](https://github.com/mernst/uwisdom) project's
+[https://github.com/mernst/uwisdom/blob/master/README.md](`README.md`) file.
 
 For usage details, pass `-h` (for example, run `lookup -h`) or see the [Lookup
 program
