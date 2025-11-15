@@ -20,12 +20,14 @@ Lookup searches a set of files, much like grep does.  However, Lookup has additi
 2. Add aliases to your shell startup file (e.g., `~/.bash_profile`):
 
    ```sh
-   alias lookup='java -ea -jar SOMEDIRECTORY/lookup/build/libs/lookup-all.jar -a'
+   alias lookup='java -ea -jar /path/to/lookup/build/libs/lookup-all.jar -a'
    alias doc='lookup -f ${HOME}/wisdom/root_user --two-blank-lines'
    alias bibfind='lookup -l -f ${HOME}/bib/bibroot'
    alias rolo='lookup -f ${HOME}/private/addresses.tex --comment-re='
    alias quotefind='lookup -f ${HOME}/misc/quotes1 -f ${HOME}/misc/quotes'
    ```
+
+   (Replace `/path/to/` with the directory where you cloned the `lookup` repository.)
 
    You might need to log out and back in for these aliases to take effect.
 
