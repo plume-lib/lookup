@@ -42,10 +42,10 @@ import org.plumelib.util.RegexUtil;
  *
  * <p>All matching entries are printed.
  *
- * <p>By default, Lookup searches the file ~/lookup/root. Files can contain comments and can include
- * other files. Comments start with a % sign in the first column by default. Any comment line is
- * ignored. A comment line does not separate entries as a blank line does. A file can include
- * another file via a line of the form '\include{filename}'.
+ * <p>By default, Lookup searches the file {@code ~/lookup/root}. Files can contain comments and can
+ * include other files. Comments start with a % sign in the first column by default. Any comment
+ * line is ignored. A comment line does not separate entries as a blank line does. A file can
+ * include another file via a line of the form '\include{filename}'.
  *
  * <p>The default behavior can be customized by way of command-line options.
  *
