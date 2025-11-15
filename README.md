@@ -34,7 +34,7 @@ Lookup searches a set of files, much like grep does.  However, Lookup has additi
 ## Usage examples
 
 See the [uwisdom](https://github.com/mernst/uwisdom) project's
-[https://github.com/mernst/uwisdom/blob/master/README.md](`README.md`) file.
+[README.md](https://github.com/mernst/uwisdom/blob/master/README.md) file.
 
 For usage details, pass `-h` (for example, run `lookup -h`) or see the [Lookup
 program
