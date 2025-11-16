@@ -115,6 +115,10 @@ import org.plumelib.util.RegexUtil;
 @SuppressWarnings("deprecation") // uses deprecated classes in this package
 public final class Lookup {
 
+  // For plume-util 1.12.3 or later:
+  // /** If true, produce diagnostic output. */
+  // private static final boolean debug = false;
+
   /** This class is a collection of methods; it does not represent anything. */
   private Lookup() {
     throw new Error("do not instantiate");
@@ -213,9 +217,6 @@ public final class Lookup {
   @Option("-v Print progress information")
   public static boolean verbose = false;
 
-  /** Platform-specific line separator. */
-  private static final String lineSep = System.lineSeparator();
-
   /** One-line synopsis of usage. */
   private static final String usageString = "lookup [options] <keyword> ...";
 
@@ -277,6 +278,8 @@ public final class Lookup {
     }
 
     try (EntryReader reader = new EntryReader(rootFile, two_blank_lines, comment_re, include_re)) {
+      // For plume-util 1.12.3 or later:
+      // reader.setDebug(debug);
 
       // Set up the regular expressions for long entries.
       reader.setEntryStartStop(entry_start_re, entry_stop_re);
@@ -408,100 +411,5 @@ public final class Lookup {
         }
       }
     }
-  }
-
-  /**
-   * Returns the next entry. If no more entries are available, returns null.
-   *
-   * @param reader where to read the entry from
-   * @return the next entry, or null
-   * @throws IOException if there is a problem reading a file
-   */
-  public static EntryReader.@Nullable Entry old_getEntry(EntryReader reader) throws IOException {
-
-    try {
-
-      // Skip any preceding blank lines.
-      String line = reader.readLine();
-      while (line != null && line.isBlank()) {
-        line = reader.readLine();
-      }
-      if (line == null) {
-        return null;
-      }
-
-      EntryReader.Entry entry;
-      String filename = reader.getFileName();
-      long lineNumber = reader.getLineNumber();
-
-      // If this is a long entry
-      if (line.startsWith(">entry")) {
-
-        // Get the current filename
-        String currentFilename = reader.getFileName();
-
-        // Remove '>entry' from the line
-        line = line.replaceFirst("^>entry *", "");
-        String firstLine = line;
-
-        StringBuilder body = new StringBuilder();
-        // Read until we find the termination of the entry
-        while ((line != null)
-            && !line.startsWith(">entry")
-            && !line.equals("<entry")
-            && currentFilename.equals(reader.getFileName())) {
-          body.append(line);
-          body.append(lineSep);
-          line = reader.readLine();
-        }
-
-        // If this entry was terminated by the start of the next one,
-        // put that line back
-        if ((line != null)
-            && (line.startsWith(">entry") || !currentFilename.equals(reader.getFileName()))) {
-          reader.putback(line);
-        }
-
-        entry = new EntryReader.Entry(firstLine, body.toString(), filename, lineNumber, false);
-
-      } else { // blank separated entry
-
-        String firstLine = line;
-
-        StringBuilder body = new StringBuilder();
-        // Read until we find another blank line.
-        while (line != null && !line.isBlank()) {
-          body.append(line);
-          body.append(lineSep);
-          line = reader.readLine();
-        }
-
-        entry = new EntryReader.Entry(firstLine, body.toString(), filename, lineNumber, true);
-      }
-
-      return entry;
-
-    } catch (FileNotFoundException e) {
-      System.out.printf(
-          "Error: Can't read %s at line %d in file %s%n",
-          e.getMessage(), reader.getLineNumber(), reader.getFileName());
-      System.exit(254);
-      return null;
-    }
-  }
-
-  /**
-   * Returns the first line of entry.
-   *
-   * @param entry the entry whose first line to return
-   * @return the first line of entry
-   */
-  public static String firstLine(String entry) {
-
-    int ii = entry.indexOf(lineSep);
-    if (ii == -1) {
-      return entry;
-    }
-    return entry.substring(0, ii);
   }
 }
