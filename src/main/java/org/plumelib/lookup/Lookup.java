@@ -193,11 +193,11 @@ public final class Lookup {
 
   /** Matches the end of a long entry. */
   @Option("Regex that denotes the end of a long entry")
-  public static Pattern entry_stop_re = Pattern.compile("^<entry");
+  public static @Regex Pattern entry_stop_re = Pattern.compile("^<entry");
 
   /** Matches the description for a long entry. */
   @Option("Regex that finds an entry's description (for long entries)")
-  public static @Nullable Pattern description_re = null;
+  public static @Nullable @Regex Pattern description_re = null;
 
   // If "", gets set to null immediately after option processing.
   /** Matches an entire comment. */
@@ -230,8 +230,6 @@ public final class Lookup {
 
     Options options = new Options(usageString, Lookup.class);
     String[] keywords = options.parse(true, args);
-
-    // TODO: validate arguments.  Check that various options are @Regex or @Regex(1).
 
     // If help was requested, print it and exit
     if (help) {
