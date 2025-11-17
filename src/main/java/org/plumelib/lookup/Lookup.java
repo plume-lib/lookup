@@ -233,11 +233,11 @@ public final class Lookup {
 
     // Validate that regex options are valid regular expressions
     if (comment_re != null && !RegexUtil.isRegex(comment_re)) {
-      System.out.println("Error: comment_re is not a valid regex: " + comment_re);
+      System.err.println("Error: --comment-re is not a regex: " + comment_re);
       System.exit(254);
     }
     if (!RegexUtil.isRegex(include_re, 1)) {
-      System.out.println("Error: include_re is not a valid regex with 1 group: " + include_re);
+      System.err.println("Error: --include-re is not a regex with 1 group: " + include_re);
       System.exit(254);
     }
 
