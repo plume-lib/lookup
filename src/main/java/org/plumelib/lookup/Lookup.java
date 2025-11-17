@@ -231,7 +231,7 @@ public final class Lookup {
     Options options = new Options(usageString, Lookup.class);
     String[] keywords = options.parse(true, args);
 
-    // TODO: validate arguments.  Check that various options are @Regex or @Regex(1).
+    // TODO: Validate arguments using isRegex.
 
     // If help was requested, print it and exit
     if (help) {
