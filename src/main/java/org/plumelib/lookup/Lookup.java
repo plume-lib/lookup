@@ -252,6 +252,17 @@ public final class Lookup {
     Options options = new Options(usageString, Lookup.class);
     String[] keywords = options.parse(true, args);
 
+    // If the comment regular expression is empty, turn off comment processing
+    if (comment_re != null && comment_re.equals("")) {
+      comment_re = null;
+    }
+    if (multiline_comment_start_re != null && multiline_comment_start_re.equals("")) {
+      multiline_comment_start_re = null;
+    }
+    if (multiline_comment_end_re != null && multiline_comment_end_re.equals("")) {
+      multiline_comment_end_re = null;
+    }
+
     // Validate that regex options are valid regular expressions
     if (comment_re != null && !RegexUtil.isRegex(comment_re)) {
       System.err.println("Error: --comment-re is not a regex: " + comment_re);
@@ -296,14 +307,6 @@ public final class Lookup {
       System.out.println("Error: No keywords specified");
       options.printUsage();
       System.exit(254);
-    }
-
-    // If the comment regular expression is empty, turn off comment processing
-    if (comment_re != null && comment_re.equals("")) {
-      comment_re = null;
-    }
-    if (multiline_comment_start_re != null && multiline_comment_start_re.equals("")) {
-      multiline_comment_start_re = null;
     }
 
     // Find the first readable root file.
