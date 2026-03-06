@@ -189,7 +189,6 @@ public final class Lookup {
   public static boolean two_blank_lines = false;
 
   /** If true, code fences are supported: blank lines within ```...``` do not end an entry. */
-  @OptionGroup("Customizing format of files to be searched")
   @Option("If true, blank lines within ```...``` do not end an entry")
   public static boolean code_fences = false;
 
