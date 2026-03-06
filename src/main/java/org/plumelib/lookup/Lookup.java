@@ -74,8 +74,8 @@ import org.plumelib.util.RegexUtil;
  *             keywords matching is case sensistive. By default, both regular expressions and text
  *             keywords are case-insensitive. [default: false]
  *         <li id="option:word-match"><b>-w</b> <b>--word-match=</b><i>boolean</i>. If true, match a
- *             text keyword only as a separate word, not as a substring of a word. This option is
- *             ignored if regular_expressions is true. [default: false]
+ *             text keyword only as a separate word, not as a substring of a word. This option may
+ *             be supplied together with {@code --regular-expressions}. [default: false]
  *       </ul>
  *   <li id="optiongroup:How-to-print-matches">How to print matches
  *       <ul>
@@ -92,14 +92,22 @@ import org.plumelib.util.RegexUtil;
  *   <li id="optiongroup:Customizing-format-of-files-to-be-searched">Customizing format of files to
  *       be searched
  *       <ul>
+ *         <li id="option:two-blank-lines"><b>--two-blank-lines=</b><i>boolean</i>. If true, entries
+ *             are separated by two blank lines. [default: false]
+ *         <li id="option:code-fences"><b>--code-fences=</b><i>boolean</i>. If true, code fences are
+ *             supported: blank lines within ```...``` do not end an entry. [default: false]
  *         <li id="option:entry-start-re"><b>--entry-start-re=</b><i>regex</i>. Matches the start of
  *             a long entry. [default: ^&gt;entry *()]
  *         <li id="option:entry-stop-re"><b>--entry-stop-re=</b><i>regex</i>. Matches the end of a
  *             long entry. [default: ^&lt;entry]
  *         <li id="option:description-re"><b>--description-re=</b><i>regex</i>. Matches the
  *             description for a long entry.
- *         <li id="option:comment-re"><b>--comment-re=</b><i>string</i>. Matches an entire comment.
- *             [default: ^%.*]
+ *         <li id="option:comment-re"><b>--comment-re=</b><i>string</i>. Matches an entire
+ *             single-line comment (not just a comment start).
+ *         <li
+ *             id="option:multiline-comment-start-re"><b>--multiline-comment-start-re=</b><i>string</i>. Matches the start of a possibly multi-line comment.
+ *         <li id="option:multiline-comment-end-re"><b>--multiline-comment-end-re=</b><i>string</i>.
+ *             Matches the end of a possibly multi-line comment.
  *         <li id="option:include-re"><b>--include-re=</b><i>string</i>. Matches an include
  *             directive; group 1 is the file name. [default: \\include\{(.*)\}]
  *       </ul>
@@ -290,17 +298,11 @@ public final class Lookup {
       System.exit(254);
     }
 
-    // comment_re starts out non-null and the option processing code can't
-    // make it null, so no null pointer exception is possible in the
-    // if statement predicate that immediately follows this assertion.
-    assert comment_re != null : "@AssumeAssertion(nullness): application invariant";
-    assert multiline_comment_start_re != null : "@AssumeAssertion(nullness): application invariant";
-
     // If the comment regular expression is empty, turn off comment processing
-    if (comment_re.equals("")) {
+    if (comment_re != null && comment_re.equals("")) {
       comment_re = null;
     }
-    if (multiline_comment_start_re.equals("")) {
+    if (multiline_comment_start_re != null && multiline_comment_start_re.equals("")) {
       multiline_comment_start_re = null;
     }
 
