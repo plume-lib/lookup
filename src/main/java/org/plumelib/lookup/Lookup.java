@@ -249,14 +249,23 @@ public final class Lookup {
       System.err.println("Error: --comment-re is not a regex: " + comment_re);
       System.exit(254);
     }
-    if (multiline_comment_start_re != null && !RegexUtil.isRegex(multiline_comment_start_re)) {
+    if (multiline_comment_start_re == null && multiline_comment_end_re == null) {
+      // Nothing to validate
+    } else if (multiline_comment_start_re != null && multiline_comment_end_re != null) {
+      if (!RegexUtil.isRegex(multiline_comment_start_re)) {
+        System.err.println(
+            "Error: --multiline-comment-start-re is not a regex: " + multiline_comment_start_re);
+        System.exit(254);
+      }
+      if (!RegexUtil.isRegex(multiline_comment_end_re)) {
+        System.err.println(
+            "Error: --multiline-comment-end-re is not a regex: " + multiline_comment_end_re);
+        System.exit(254);
+      }
+    } else {
       System.err.println(
-          "Error: --multiline-comment-start-re is not a regex: " + multiline_comment_start_re);
-      System.exit(254);
-    }
-    if (multiline_comment_end_re != null && !RegexUtil.isRegex(multiline_comment_end_re)) {
-      System.err.println(
-          "Error: --multiline-comment-end-re is not a regex: " + multiline_comment_end_re);
+          "Error: supply both or neither of --multiline_comment_start_re and"
+              + " --multiline_comment_end_re, not just one.");
       System.exit(254);
     }
     if (!RegexUtil.isRegex(include_re, 1)) {
