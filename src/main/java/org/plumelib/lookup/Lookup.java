@@ -105,7 +105,8 @@ import org.plumelib.util.RegexUtil;
  *         <li id="option:comment-re"><b>--comment-re=</b><i>string</i>. Matches an entire
  *             single-line comment (not just a comment start).
  *         <li
- *             id="option:multiline-comment-start-re"><b>--multiline-comment-start-re=</b><i>string</i>. Matches the start of a possibly multi-line comment.
+ *             id="option:multiline-comment-start-re"><b>--multiline-comment-start-re=</b><i>string</i>.
+ *             Matches the start of a possibly multi-line comment.
  *         <li id="option:multiline-comment-end-re"><b>--multiline-comment-end-re=</b><i>string</i>.
  *             Matches the end of a possibly multi-line comment.
  *         <li id="option:include-re"><b>--include-re=</b><i>string</i>. Matches an include
@@ -247,6 +248,7 @@ public final class Lookup {
    * @param args command-line arguments; see documentation
    * @throws IOException if there is a problem reading a file
    */
+  @SuppressWarnings("PMD.NonThreadSafeSingleton")
   public static void main(String[] args) throws IOException {
 
     Options options = new Options(usageString, Lookup.class);
