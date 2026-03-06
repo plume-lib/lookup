@@ -285,8 +285,8 @@ public final class Lookup {
       }
     } else {
       System.err.println(
-          "Error: supply both or neither of --multiline_comment_start_re and"
-              + " --multiline_comment_end_re, not just one.");
+          "Error: supply both or neither of --multiline-comment-start-re and"
+              + " --multiline-comment-end-re, not just one.");
       System.exit(254);
     }
     if (!RegexUtil.isRegex(include_re, 1)) {
