@@ -14,6 +14,8 @@ import org.plumelib.options.Option;
 import org.plumelib.options.OptionGroup;
 import org.plumelib.options.Options;
 import org.plumelib.util.EntryReader;
+import org.plumelib.util.EntryReader.CommentFormat;
+import org.plumelib.util.EntryReader.EntryFormat;
 import org.plumelib.util.FilesPlume;
 import org.plumelib.util.RegexUtil;
 
@@ -72,8 +74,8 @@ import org.plumelib.util.RegexUtil;
  *             keywords matching is case sensistive. By default, both regular expressions and text
  *             keywords are case-insensitive. [default: false]
  *         <li id="option:word-match"><b>-w</b> <b>--word-match=</b><i>boolean</i>. If true, match a
- *             text keyword only as a separate word, not as a substring of a word. This option is
- *             ignored if regular_expressions is true. [default: false]
+ *             text keyword only as a separate word, not as a substring of a word. This option may
+ *             be supplied together with {@code --regular-expressions}. [default: false]
  *       </ul>
  *   <li id="optiongroup:How-to-print-matches">How to print matches
  *       <ul>
@@ -90,14 +92,23 @@ import org.plumelib.util.RegexUtil;
  *   <li id="optiongroup:Customizing-format-of-files-to-be-searched">Customizing format of files to
  *       be searched
  *       <ul>
+ *         <li id="option:two-blank-lines"><b>--two-blank-lines=</b><i>boolean</i>. If true, entries
+ *             are separated by two blank lines. [default: false]
+ *         <li id="option:code-fences"><b>--code-fences=</b><i>boolean</i>. If true, code fences are
+ *             supported: blank lines within ```...``` do not end an entry. [default: false]
  *         <li id="option:entry-start-re"><b>--entry-start-re=</b><i>regex</i>. Matches the start of
  *             a long entry. [default: ^&gt;entry *()]
  *         <li id="option:entry-stop-re"><b>--entry-stop-re=</b><i>regex</i>. Matches the end of a
  *             long entry. [default: ^&lt;entry]
  *         <li id="option:description-re"><b>--description-re=</b><i>regex</i>. Matches the
  *             description for a long entry.
- *         <li id="option:comment-re"><b>--comment-re=</b><i>string</i>. Matches an entire comment.
- *             [default: ^%.*]
+ *         <li id="option:comment-re"><b>--comment-re=</b><i>string</i>. Matches an entire
+ *             single-line comment (not just a comment start).
+ *         <li
+ *             id="option:multiline-comment-start-re"><b>--multiline-comment-start-re=</b><i>string</i>.
+ *             Matches the start of a possibly multi-line comment.
+ *         <li id="option:multiline-comment-end-re"><b>--multiline-comment-end-re=</b><i>string</i>.
+ *             Matches the end of a possibly multi-line comment.
  *         <li id="option:include-re"><b>--include-re=</b><i>string</i>. Matches an include
  *             directive; group 1 is the file name. [default: \\include\{(.*)\}]
  *       </ul>
@@ -115,9 +126,8 @@ import org.plumelib.util.RegexUtil;
 @SuppressWarnings("deprecation") // uses deprecated classes in this package
 public final class Lookup {
 
-  // For plume-util 1.12.3 or later:
-  // /** If true, produce diagnostic output. */
-  // private static final boolean debug = false;
+  /** If true, produce diagnostic output. */
+  private static final boolean debug = false;
 
   /** This class is a collection of methods; it does not represent anything. */
   private Lookup() {
@@ -187,6 +197,10 @@ public final class Lookup {
   @Option("If true, entries are separated by two blank lines")
   public static boolean two_blank_lines = false;
 
+  /** If true, code fences are supported: blank lines within ```...``` do not end an entry. */
+  @Option("If true, blank lines within ```...``` do not end an entry")
+  public static boolean code_fences = false;
+
   /** Matches the start of a long entry. */
   @Option("Regex that denotes the start of a long entry")
   public static @Regex(1) Pattern entry_start_re = Pattern.compile("^>entry *()");
@@ -200,9 +214,17 @@ public final class Lookup {
   public static @Nullable Pattern description_re = null;
 
   // If "", gets set to null immediately after option processing.
-  /** Matches an entire comment. */
-  @Option("Regex that matches an entire comment (not just a comment start)")
-  public static @Nullable @Regex String comment_re = "^%.*";
+  /** Matches an entire single-line comment (not just a comment start). */
+  @Option("Regex that matches a single-line comment")
+  public static @Nullable @Regex String comment_re;
+
+  /** Matches the start of a possibly multi-line comment. */
+  @Option("Regex that matches the start of a delimited comment")
+  public static @Nullable @Regex String multiline_comment_start_re;
+
+  /** Matches the end of a possibly multi-line comment. */
+  @Option("Regex that matches the end of a delimited comment")
+  public static @Nullable @Regex String multiline_comment_end_re;
 
   /** Matches an include directive; group 1 is the file name. */
   @Option("Regex that matches an include directive; group 1 is the file name")
@@ -226,14 +248,45 @@ public final class Lookup {
    * @param args command-line arguments; see documentation
    * @throws IOException if there is a problem reading a file
    */
+  @SuppressWarnings("PMD.NonThreadSafeSingleton")
   public static void main(String[] args) throws IOException {
 
     Options options = new Options(usageString, Lookup.class);
     String[] keywords = options.parse(true, args);
 
+    // If the comment regular expression is empty, turn off comment processing
+    if (comment_re != null && comment_re.equals("")) {
+      comment_re = null;
+    }
+    if (multiline_comment_start_re != null && multiline_comment_start_re.equals("")) {
+      multiline_comment_start_re = null;
+    }
+    if (multiline_comment_end_re != null && multiline_comment_end_re.equals("")) {
+      multiline_comment_end_re = null;
+    }
+
     // Validate that regex options are valid regular expressions
     if (comment_re != null && !RegexUtil.isRegex(comment_re)) {
       System.err.println("Error: --comment-re is not a regex: " + comment_re);
+      System.exit(254);
+    }
+    if (multiline_comment_start_re == null && multiline_comment_end_re == null) {
+      // Nothing to validate
+    } else if (multiline_comment_start_re != null && multiline_comment_end_re != null) {
+      if (!RegexUtil.isRegex(multiline_comment_start_re)) {
+        System.err.println(
+            "Error: --multiline-comment-start-re is not a regex: " + multiline_comment_start_re);
+        System.exit(254);
+      }
+      if (!RegexUtil.isRegex(multiline_comment_end_re)) {
+        System.err.println(
+            "Error: --multiline-comment-end-re is not a regex: " + multiline_comment_end_re);
+        System.exit(254);
+      }
+    } else {
+      System.err.println(
+          "Error: supply both or neither of --multiline-comment-start-re and"
+              + " --multiline-comment-end-re, not just one.");
       System.exit(254);
     }
     if (!RegexUtil.isRegex(include_re, 1)) {
@@ -258,16 +311,6 @@ public final class Lookup {
       System.exit(254);
     }
 
-    // comment_re starts out non-null and the option processing code can't
-    // make it null, so no null pointer exception is possible in the
-    // if statement predicate that immediately follows this assertion.
-    assert comment_re != null : "@AssumeAssertion(nullness): application invariant";
-
-    // If the comment regular expression is empty, turn off comment processing
-    if (comment_re.equals("")) {
-      comment_re = null;
-    }
-
     // Find the first readable root file.
     String rootFile = null;
     for (String candidate_unexpanded : entry_file.split(":", -1)) {
@@ -285,12 +328,12 @@ public final class Lookup {
       System.exit(254);
     }
 
-    try (EntryReader reader = new EntryReader(rootFile, two_blank_lines, comment_re, include_re)) {
-      // For plume-util 1.12.3 or later:
-      // reader.setDebug(debug);
-
-      // Set up the regular expressions for long entries.
-      reader.setEntryStartStop(entry_start_re, entry_stop_re);
+    EntryFormat entryFormat =
+        new EntryFormat(entry_start_re, entry_stop_re, two_blank_lines, code_fences);
+    CommentFormat commentFormat =
+        new CommentFormat(comment_re, multiline_comment_start_re, multiline_comment_end_re);
+    try (EntryReader reader = new EntryReader(rootFile, entryFormat, commentFormat, include_re)) {
+      reader.setDebug(debug);
 
       List<EntryReader.Entry> matchingEntries = new ArrayList<>();
 
