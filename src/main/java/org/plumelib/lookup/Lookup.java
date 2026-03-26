@@ -255,13 +255,13 @@ public final class Lookup {
     String[] keywords = options.parse(true, args);
 
     // If the comment regular expression is empty, turn off comment processing
-    if (comment_re != null && comment_re.equals("")) {
+    if (comment_re != null && comment_re.isEmpty()) {
       comment_re = null;
     }
-    if (multiline_comment_start_re != null && multiline_comment_start_re.equals("")) {
+    if (multiline_comment_start_re != null && multiline_comment_start_re.isEmpty()) {
       multiline_comment_start_re = null;
     }
-    if (multiline_comment_end_re != null && multiline_comment_end_re.equals("")) {
+    if (multiline_comment_end_re != null && multiline_comment_end_re.isEmpty()) {
       multiline_comment_end_re = null;
     }
 
