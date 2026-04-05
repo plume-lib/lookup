@@ -71,7 +71,7 @@ import org.plumelib.util.RegexUtil;
  *             <b>--regular-expressions=</b><i>boolean</i>. Specifies that keywords are regular
  *             expressions. If false, keywords are text matches. [default: false]
  *         <li id="option:case-sensitive"><b>-c</b> <b>--case-sensitive=</b><i>boolean</i>. If true,
- *             keywords matching is case sensistive. By default, both regular expressions and text
+ *             keywords matching is case sensitive. By default, both regular expressions and text
  *             keywords are case-insensitive. [default: false]
  *         <li id="option:word-match"><b>-w</b> <b>--word-match=</b><i>boolean</i>. If true, match a
  *             text keyword only as a separate word, not as a substring of a word. This option may
@@ -160,10 +160,10 @@ public final class Lookup {
   public static boolean regular_expressions = false;
 
   /**
-   * If true, keywords matching is case sensistive. By default, both regular expressions and text
+   * If true, keywords matching is case sensitive. By default, both regular expressions and text
    * keywords are case-insensitive.
    */
-  @Option("-c Keywords are case sensistive")
+  @Option("-c Keywords are case sensitive")
   public static boolean case_sensitive = false;
 
   /**
@@ -270,9 +270,7 @@ public final class Lookup {
       System.err.println("Error: --comment-re is not a regex: " + comment_re);
       System.exit(254);
     }
-    if (multiline_comment_start_re == null && multiline_comment_end_re == null) {
-      // Nothing to validate
-    } else if (multiline_comment_start_re != null && multiline_comment_end_re != null) {
+    if (multiline_comment_start_re != null && multiline_comment_end_re != null) {
       if (!RegexUtil.isRegex(multiline_comment_start_re)) {
         System.err.println(
             "Error: --multiline-comment-start-re is not a regex: " + multiline_comment_start_re);
@@ -283,7 +281,7 @@ public final class Lookup {
             "Error: --multiline-comment-end-re is not a regex: " + multiline_comment_end_re);
         System.exit(254);
       }
-    } else {
+    } else if (multiline_comment_start_re != null || multiline_comment_end_re != null) {
       System.err.println(
           "Error: supply both or neither of --multiline-comment-start-re and"
               + " --multiline-comment-end-re, not just one.");
@@ -365,6 +363,7 @@ public final class Lookup {
       try {
         // Process each entry looking for matches
         int entryCnt = 0;
+        boolean usePatterns = !patterns.isEmpty();
 
         EntryReader.Entry entry = reader.getEntry();
         while (entry != null) {
@@ -375,7 +374,7 @@ public final class Lookup {
           String toSearch =
               (search_body || entry.shortEntry) ? entry.body : entry.getDescription(description_re);
           boolean found = true;
-          if (!patterns.isEmpty()) {
+          if (usePatterns) {
             for (Pattern pattern : patterns) {
               if (!pattern.matcher(toSearch).find()) {
                 found = false;
@@ -432,7 +431,6 @@ public final class Lookup {
           }
           System.out.print(e.body);
         } else {
-          int i = 0;
           if (print_all) {
             System.out.printf("%d matches found (separated by dashes below)%n", numMatchingEntries);
           } else {
@@ -441,8 +439,8 @@ public final class Lookup {
                 numMatchingEntries);
           }
 
-          for (EntryReader.Entry e : matchingEntries) {
-            i++;
+          for (int i = 0; i < numMatchingEntries; i++) {
+            EntryReader.Entry e = matchingEntries.get(i);
             if (print_all) {
               if (show_location) {
                 System.out.printf(
@@ -453,9 +451,10 @@ public final class Lookup {
               System.out.print(e.body);
             } else {
               if (show_location) {
-                System.out.printf("  -i=%d %s:%d: %s%n", i, e.filename, e.lineNumber, e.firstLine);
+                System.out.printf(
+                    "  -i=%d %s:%d: %s%n", i + 1, e.filename, e.lineNumber, e.firstLine);
               } else {
-                System.out.printf("  -i=%d %s%n", i, e.getDescription(description_re));
+                System.out.printf("  -i=%d %s%n", i + 1, e.getDescription(description_re));
               }
             }
           }
