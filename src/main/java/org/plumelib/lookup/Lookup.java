@@ -310,8 +310,9 @@ public final class Lookup {
     }
 
     // Find the first readable root file.
+    String[] entryFileCandidates = entry_file.split(":", -1);
     String rootFile = null;
-    for (String candidate_unexpanded : entry_file.split(":", -1)) {
+    for (String candidate_unexpanded : entryFileCandidates) {
       String candidate = FilesPlume.expandFilename(candidate_unexpanded);
       if (Files.isReadable(Path.of(candidate))) {
         rootFile = candidate;
@@ -320,7 +321,7 @@ public final class Lookup {
     }
     if (rootFile == null) {
       System.out.println("Error: Can't read any entry files.");
-      for (String unreadable : entry_file.split(":", -1)) {
+      for (String unreadable : entryFileCandidates) {
         System.out.printf("  entry file %s%n", FilesPlume.expandFilename(unreadable));
       }
       System.exit(254);
