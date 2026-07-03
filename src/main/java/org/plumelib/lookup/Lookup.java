@@ -34,7 +34,7 @@ import org.plumelib.util.RegexUtil;
  * <p>A file can contain one or more entries, each of which is a short entry or a long entry.
  *
  * <ul>
- *   <li>A short entry is a single paragraph (delimited from the next entry by one or two blank
+ *   <li>A short entry is a single paragraph, delimited from the next entry by one or two blank
  *       lines (default: 1). Lookup searches all of a short entry.
  *   <li>A long entry is introduced by a line that begins with '{@code >entry}'. The remainder of
  *       that line is a one-line description of the entry. A long entry is terminated by '{@code
@@ -71,7 +71,7 @@ import org.plumelib.util.RegexUtil;
  *             <b>--regular-expressions=</b><i>boolean</i>. Specifies that keywords are regular
  *             expressions. If false, keywords are text matches. [default: false]
  *         <li id="option:case-sensitive"><b>-c</b> <b>--case-sensitive=</b><i>boolean</i>. If true,
- *             keywords matching is case sensitive. By default, both regular expressions and text
+ *             keyword matching is case sensitive. By default, both regular expressions and text
  *             keywords are case-insensitive. [default: false]
  *         <li id="option:word-match"><b>-w</b> <b>--word-match=</b><i>boolean</i>. If true, match a
  *             text keyword only as a separate word, not as a substring of a word. This option may
@@ -160,7 +160,7 @@ public final class Lookup {
   public static boolean regular_expressions = false;
 
   /**
-   * If true, keywords matching is case sensitive. By default, both regular expressions and text
+   * If true, keyword matching is case sensitive. By default, both regular expressions and text
    * keywords are case-insensitive.
    */
   @Option("-c Keywords are case sensitive")
