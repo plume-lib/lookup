@@ -304,7 +304,7 @@ public final class Lookup {
 
     // Make sure at least one keyword was specified
     if (keywords.length == 0) {
-      System.out.println("Error: No keywords specified");
+      System.err.println("Error: No keywords specified");
       options.printUsage();
       System.exit(254);
     }
@@ -312,17 +312,17 @@ public final class Lookup {
     // Find the first readable root file.
     String[] entryFileCandidates = entry_file.split(":", -1);
     String rootFile = null;
-    for (String candidate_unexpanded : entryFileCandidates) {
-      String candidate = FilesPlume.expandFilename(candidate_unexpanded);
+    for (String candidateUnexpanded : entryFileCandidates) {
+      String candidate = FilesPlume.expandFilename(candidateUnexpanded);
       if (Files.isReadable(Path.of(candidate))) {
         rootFile = candidate;
         break;
       }
     }
     if (rootFile == null) {
-      System.out.println("Error: Can't read any entry files.");
+      System.err.println("Error: Can't read any entry files.");
       for (String unreadable : entryFileCandidates) {
-        System.out.printf("  entry file %s%n", FilesPlume.expandFilename(unreadable));
+        System.err.printf("  entry file %s%n", FilesPlume.expandFilename(unreadable));
       }
       System.exit(254);
     }
@@ -345,7 +345,7 @@ public final class Lookup {
       if (regular_expressions) {
         for (String keyword : keywords) {
           if (!RegexUtil.isRegex(keyword)) {
-            System.out.println("Error: not a regex: " + keyword);
+            System.err.println("Error: not a regex: " + keyword);
             System.exit(254);
           }
           patterns.add(Pattern.compile(keyword, flags));
@@ -399,7 +399,7 @@ public final class Lookup {
           entry = reader.getEntry();
         }
       } catch (FileNotFoundException e) {
-        System.out.printf(
+        System.err.printf(
             "Error: Can't read %s at line %d in file %s%n",
             e.getMessage(), reader.getLineNumber(), reader.getFileName());
         System.exit(254);
@@ -418,11 +418,11 @@ public final class Lookup {
       } else { // there are multiple matches
         if (item_num != null) {
           if (item_num < 1) {
-            System.out.printf("Illegal --item-num %d, should be positive%n", item_num);
+            System.err.printf("Illegal --item-num %d, should be positive%n", item_num);
             System.exit(1);
           }
           if (item_num > numMatchingEntries) {
-            System.out.printf(
+            System.err.printf(
                 "Illegal --item-num %d, should be <= %d%n", item_num, numMatchingEntries);
             System.exit(1);
           }
