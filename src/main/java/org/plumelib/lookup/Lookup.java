@@ -16,7 +16,7 @@ import org.plumelib.options.Options;
 import org.plumelib.util.EntryReader;
 import org.plumelib.util.EntryReader.CommentFormat;
 import org.plumelib.util.EntryReader.EntryFormat;
-import org.plumelib.util.FilesPlume;
+import org.plumelib.util.FilesP;
 import org.plumelib.util.RegexUtil;
 
 /**
@@ -313,7 +313,7 @@ public final class Lookup {
     String[] entryFileCandidates = entry_file.split(":", -1);
     String rootFile = null;
     for (String candidateUnexpanded : entryFileCandidates) {
-      String candidate = FilesPlume.expandFilename(candidateUnexpanded);
+      String candidate = FilesP.expandFilename(candidateUnexpanded);
       if (Files.isReadable(Path.of(candidate))) {
         rootFile = candidate;
         break;
@@ -322,7 +322,7 @@ public final class Lookup {
     if (rootFile == null) {
       System.err.println("Error: Can't read any entry files.");
       for (String unreadable : entryFileCandidates) {
-        System.err.printf("  entry file %s%n", FilesPlume.expandFilename(unreadable));
+        System.err.printf("  entry file %s%n", FilesP.expandFilename(unreadable));
       }
       System.exit(254);
     }
@@ -373,7 +373,9 @@ public final class Lookup {
             System.out.printf("%d matches in %d entries\r", matchingEntries.size(), entryCnt);
           }
           String toSearch =
-              (search_body || entry.shortEntry) ? entry.body : entry.getDescription(description_re);
+              (search_body || entry.shortEntry())
+                  ? entry.body()
+                  : entry.getDescription(description_re);
           boolean found = true;
           if (usePatterns) {
             for (Pattern pattern : patterns) {
@@ -412,9 +414,9 @@ public final class Lookup {
       } else if (numMatchingEntries == 1) {
         EntryReader.Entry e = matchingEntries.get(0);
         if (show_location) {
-          System.out.printf("%s:%d:%n", e.filename, e.lineNumber);
+          System.out.printf("%s:%d:%n", e.filename(), e.lineNumber());
         }
-        System.out.print(e.body);
+        System.out.print(e.body());
       } else { // there are multiple matches
         if (item_num != null) {
           if (item_num < 1) {
@@ -428,9 +430,9 @@ public final class Lookup {
           }
           EntryReader.Entry e = matchingEntries.get(item_num - 1);
           if (show_location) {
-            System.out.printf("%s:%d:%n", e.filename, e.lineNumber);
+            System.out.printf("%s:%d:%n", e.filename(), e.lineNumber());
           }
-          System.out.print(e.body);
+          System.out.print(e.body());
         } else {
           if (print_all) {
             System.out.printf("%d matches found (separated by dashes below)%n", numMatchingEntries);
@@ -445,15 +447,15 @@ public final class Lookup {
             if (print_all) {
               if (show_location) {
                 System.out.printf(
-                    "%n-------------------------%n%s:%d:%n", e.filename, e.lineNumber);
+                    "%n-------------------------%n%s:%d:%n", e.filename(), e.lineNumber());
               } else {
                 System.out.printf("%n-------------------------%n");
               }
-              System.out.print(e.body);
+              System.out.print(e.body());
             } else {
               if (show_location) {
                 System.out.printf(
-                    "  -i=%d %s:%d: %s%n", i + 1, e.filename, e.lineNumber, e.firstLine);
+                    "  -i=%d %s:%d: %s%n", i + 1, e.filename(), e.lineNumber(), e.firstLine());
               } else {
                 System.out.printf("  -i=%d %s%n", i + 1, e.getDescription(description_re));
               }
