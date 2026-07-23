@@ -1,8 +1,10 @@
 # lookup
 
-Lookup searches a set of files, much like grep does.  However, Lookup has additional features:
+Lookup searches a set of files, much like grep does.
+However, Lookup has additional features:
 
-* It searches by entry rather than by line.  By default, an entry is a paragraph, which may be separated by one or two blank lines.
+* It searches by entry rather than by line.  By default, an entry is a
+  paragraph, which may be separated by one or two blank lines.
 * It respects comments, ignoring matches within them.
 * It respects `\include` directives (it searches the named file).
 * It supports customizable search patterns and output formatting.
