@@ -515,10 +515,10 @@ public final class Lookup {
       return;
     }
     Pattern wordCharacter = Pattern.compile("\\w", flags);
-    char first = keyword.charAt(0);
-    char last = keyword.charAt(keyword.length() - 1);
+    int first = keyword.codePointAt(0);
+    int last = keyword.codePointBefore(keyword.length());
     String position;
-    char offender;
+    int offender;
     if (isLiteralNonWordCharacter(first, isRegex, wordCharacter)) {
       position = "starts";
       offender = first;
@@ -529,8 +529,8 @@ public final class Lookup {
       return;
     }
     System.err.printf(
-        "Error: cannot apply --word-match to %s, which %s with non-word character '%c'.%n",
-        keyword, position, offender);
+        "Error: cannot apply --word-match to %s, which %s with non-word character '%s'.%n",
+        keyword, position, Character.toString(offender));
     System.err.println(
         "  A word boundary adjacent to a non-word character requires a word character on its other"
             + " side, so the search would match almost nothing.");
@@ -540,12 +540,12 @@ public final class Lookup {
   /**
    * Returns true if {@code c} is certainly matched literally and is not a word character.
    *
-   * @param c the first or last character of a search term
+   * @param c the first or last code point of a search term
    * @param isRegex true if the search term is a regular expression rather than literal text
    * @param wordCharacter a regular expression that matches one word character
    * @return true if {@code c} is certainly a literal non-word character
    */
-  private static boolean isLiteralNonWordCharacter(char c, boolean isRegex, Pattern wordCharacter) {
+  private static boolean isLiteralNonWordCharacter(int c, boolean isRegex, Pattern wordCharacter) {
     if (isRegex && regexMetacharacters.indexOf(c) != -1) {
       // The character is special, so it might match a word character, or it might change what a
       // neighboring character means.
