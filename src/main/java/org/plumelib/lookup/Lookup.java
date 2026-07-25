@@ -353,18 +353,20 @@ public final class Lookup {
             System.err.println("Error: not a regex: " + keyword);
             System.exit(254);
           }
-          // If --word-match is also supplied, match the regex only at word boundaries.  Validate
-          // the composed regex rather than `keyword`, because wrapping can make a valid regex
-          // invalid.  For example, `\Qfoo` is a valid regex, but in `\b(?:\Qfoo)\b` the `\Q`
-          // quotes the rest of the regex, leaving the group unclosed.
-          if (word_match) {
-            keyword = "\\b(?:" + keyword + ")\\b";
-            if (!RegexUtil.isRegex(keyword)) {
-              System.err.println("Error: not a regex: " + keyword);
-              Syste.exit(254);
-            }
+          // If --word-match is also supplied, match the regex only at word boundaries.  The
+          // composed regex needs a validity check of its own, because wrapping can turn a valid
+          // regex into an invalid one.  For example, `\Qfoo` is a regex, but in `\b(?:\Qfoo)\b`
+          // the `\Q` quotes the rest of the regex, leaving the group unclosed.
+          String keywordRegex = word_match ? "\\b(?:" + keyword + ")\\b" : keyword;
+          if (!RegexUtil.isRegex(keywordRegex)) {
+            // Only --word-match can reach here: without it, keywordRegex is keyword, which was
+            // checked above.  So blame --word-match, and do not claim that keyword is not a regex.
+            System.err.printf(
+                "Error: cannot apply --word-match to regex %s: %s%n",
+                keyword, RegexUtil.regexError(keywordRegex));
+            System.exit(254);
           }
-          patterns.add(Pattern.compile(keyword, flags));
+          patterns.add(Pattern.compile(keywordRegex, flags));
         }
       } else if (word_match) {
         for (String keyword : keywords) {

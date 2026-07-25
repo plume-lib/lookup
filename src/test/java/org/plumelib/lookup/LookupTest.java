@@ -199,8 +199,15 @@ final class LookupTest {
   void testInvalidComposedRegularExpression() throws IOException, InterruptedException {
     LookupResult result = runLookup("--regular-expressions", "--word-match", "\\Qfoo");
     assertEquals(254, result.exitStatus());
-    // The message names the search term the user supplied, not the composed regex.
-    assertEquals("Error: not a regex: \\b\\Qfoo\\b" + lineSep, result.stderr());
+    // The message blames --word-match, which is what made the regex invalid.
+    assertTrue(
+        result.stderr().startsWith("Error: cannot apply --word-match to regex \\Qfoo: "),
+        result.stderr());
+    // The message shows the composed regex, and explains what is wrong with it.
+    assertTrue(result.stderr().contains("\\b(?:\\Qfoo)\\b"), result.stderr());
+    assertTrue(result.stderr().contains("Unclosed group"), result.stderr());
+    // "\Qfoo" is itself a regex, so the message must not claim otherwise.
+    assertFalse(result.stderr().contains("not a regex"), result.stderr());
     assertFalse(result.stderr().contains("Exception"), "unexpected stack trace");
 
     // Without --word-match, the same search term is a valid regex.
