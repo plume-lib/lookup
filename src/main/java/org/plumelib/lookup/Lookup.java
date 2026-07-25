@@ -74,8 +74,11 @@ import org.plumelib.util.RegexUtil;
  *             keyword matching is case sensitive. By default, both regular expressions and text
  *             keywords are case-insensitive. [default: false]
  *         <li id="option:word-match"><b>-w</b> <b>--word-match=</b><i>boolean</i>. If true, match a
- *             text keyword only as a separate word, not as a substring of a word. This option may
- *             be supplied together with {@code --regular-expressions}. [default: false]
+ *             keyword or regular expression only as a separate word, not as a substring of a word.
+ *             This option may be supplied together with {@code --regular-expressions}. Beware that
+ *             a search term whose first or last character is not a word character can never match;
+ *             for example, {@code #define} matches nothing, because a word boundary must be
+ *             preceded by a word character. [default: false]
  *       </ul>
  *   <li id="optiongroup:How-to-print-matches">How to print matches
  *       <ul>
@@ -167,8 +170,10 @@ public final class Lookup {
   public static boolean case_sensitive = false;
 
   /**
-   * If true, match a text keyword only as a separate word, not as a substring of a word. This
-   * option may be supplied together with {@code --regular-expressions}.
+   * If true, match a keyword or regular expression only as a separate word, not as a substring of a
+   * word. This option may be supplied together with {@code --regular-expressions}. Beware that a
+   * search term whose first or last character is not a word character can never match; for example,
+   * {@code #define} matches nothing, because a word boundary must be preceded by a word character.
    */
   @Option("-w Only match search terms against complete words")
   public static boolean word_match = false;
@@ -348,10 +353,18 @@ public final class Lookup {
             System.err.println("Error: not a regex: " + keyword);
             System.exit(254);
           }
-          // If --word-match is also supplied, match the regex only at word boundaries.
-          String keywordRegex =
-              word_match ? RegexUtil.asRegex("\\b(?:" + keyword + ")\\b") : keyword;
-          patterns.add(Pattern.compile(keywordRegex, flags));
+          // If --word-match is also supplied, match the regex only at word boundaries.  Validate
+          // the composed regex rather than `keyword`, because wrapping can make a valid regex
+          // invalid.  For example, `\Qfoo` is a valid regex, but in `\b(?:\Qfoo)\b` the `\Q`
+          // quotes the rest of the regex, leaving the group unclosed.
+          if (word_match) {
+            keyword = "\\b(?:" + keyword + ")\\b";
+            if (!RegexUtil.isRegex(keyword)) {
+              System.err.println("Error: not a regex: " + keyword);
+              Syste.exit(254);
+            }
+          }
+          patterns.add(Pattern.compile(keyword, flags));
         }
       } else if (word_match) {
         for (String keyword : keywords) {
@@ -460,12 +473,12 @@ public final class Lookup {
    * Print a matching entry: its location (if {@code --show-location} was supplied) followed by its
    * body.
    *
-   * @param e the entry to print
+   * @param entry the entry to print
    */
-  private static void printMatch(EntryReader.Entry e) {
+  private static void printMatch(EntryReader.Entry entry) {
     if (show_location) {
-      System.out.printf("%s:%d:%n", e.filename(), e.lineNumber());
+      System.out.printf("%s:%d:%n", entry.filename(), entry.lineNumber());
     }
-    System.out.print(e.body());
+    System.out.print(entry.body());
   }
 }
