@@ -52,12 +52,21 @@ final class LookupTest {
   /** The fourth entry of {@link #entryFile}. Its keyword starts with a non-word character. */
   private static final String entryFour = "four: #define DIRECTIVE";
 
+  /**
+   * The fifth entry of {@link #entryFile}. "café" ends with a word character that is not an ASCII
+   * word character, so {@code \w} matches it only under {@code UNICODE_CHARACTER_CLASS}. The
+   * character is written as an escape so that this file's encoding cannot affect the test.
+   */
+  private static final String entryFive = "five: caf\u00e9 society";
+
   /** Write the entry file that the tests search. */
   @BeforeEach
   void writeEntryFile() throws IOException {
     entryFile = tempDir.resolve("root");
     Files.writeString(
-        entryFile, String.join("\n", entryOne, "", entryTwo, "", entryThree, "", entryFour, ""));
+        entryFile,
+        String.join(
+            "\n", entryOne, "", entryTwo, "", entryThree, "", entryFour, "", entryFive, ""));
   }
 
   /**
@@ -164,20 +173,82 @@ final class LookupTest {
   }
 
   /**
-   * Test that a search term whose first character is not a word character matches nothing under
-   * {@code --word-match}, as {@code --word-match}'s documentation warns. A word boundary must be
-   * preceded by a word character, and "#" is not one.
+   * Test that a search term whose first character is not a word character is diagnosed under {@code
+   * --word-match}, rather than silently finding almost nothing. A word boundary adjacent to a
+   * non-word character requires a word character on its other side, and "#" is not one.
    */
   @Test
-  void testWordMatchNonWordCharacter() throws IOException, InterruptedException {
-    LookupResult withWordMatch = runLookup("--regular-expressions", "--word-match", "#define");
-    assertEquals(0, withWordMatch.exitStatus());
-    assertEquals("Nothing found." + lineSep, withWordMatch.stdout());
+  void testWordMatchNonWordCharacterAtStart() throws IOException, InterruptedException {
+    for (String[] args :
+        List.of(
+            new String[] {"--regular-expressions", "--word-match", "#define"},
+            new String[] {"--word-match", "#define"})) {
+      LookupResult result = runLookup(args);
+      assertEquals(254, result.exitStatus(), result.stderr());
+      assertTrue(
+          result
+              .stderr()
+              .startsWith(
+                  "Error: cannot apply --word-match to #define, which starts with non-word"
+                      + " character '#'."),
+          result.stderr());
+      assertEquals("", result.stdout(), "should not also report a search result");
+    }
 
     // Without --word-match, the same search term is found.
     LookupResult withoutWordMatch = runLookup("--regular-expressions", "#define");
     assertEquals(0, withoutWordMatch.exitStatus());
     assertEquals(entryFour + lineSep, withoutWordMatch.stdout());
+  }
+
+  /** Test that a search term whose last character is not a word character is likewise diagnosed. */
+  @Test
+  void testWordMatchNonWordCharacterAtEnd() throws IOException, InterruptedException {
+    LookupResult result = runLookup("--regular-expressions", "--word-match", "foo-");
+    assertEquals(254, result.exitStatus(), result.stderr());
+    assertTrue(
+        result
+            .stderr()
+            .startsWith(
+                "Error: cannot apply --word-match to foo-, which ends with non-word character"
+                    + " '-'."),
+        result.stderr());
+  }
+
+  /**
+   * Test that the check in {@link #testWordMatchNonWordCharacterAtStart} does not reject a regular
+   * expression that might legitimately match a word character. It is a heuristic, so it must err
+   * toward permitting a search: rejecting one is fatal.
+   */
+  @Test
+  void testWordMatchableCheckIsConservative() throws IOException, InterruptedException {
+    // An alternation: "#foo" starts with a non-word character, but "bar" does not.
+    LookupResult alternation = runLookup("--regular-expressions", "--word-match", "#foo|bar");
+    assertEquals(0, alternation.exitStatus(), alternation.stderr());
+    assertEquals(entryOne + lineSep, alternation.stdout());
+
+    // A leading metacharacter, which might match a word character.
+    LookupResult characterClass = runLookup("--regular-expressions", "--word-match", "[#]bar");
+    assertEquals(0, characterClass.exitStatus(), characterClass.stderr());
+    // The heuristic permits this search, which then finds nothing.  That is the accepted cost of
+    // never rejecting a search that might have worked.
+    assertEquals("Nothing found." + lineSep, characterClass.stdout());
+  }
+
+  /**
+   * Test that {@code \w} means the same thing whether or not {@code --word-match} is supplied.
+   * "café" ends with a non-ASCII word character, which {@code \w} matches only under {@code
+   * UNICODE_CHARACTER_CLASS}.
+   */
+  @Test
+  void testUnicodeCharacterClassIsConsistent() throws IOException, InterruptedException {
+    LookupResult withoutWordMatch = runLookup("--regular-expressions", "caf\\w");
+    assertEquals(0, withoutWordMatch.exitStatus(), withoutWordMatch.stderr());
+    assertEquals(entryFive + lineSep, withoutWordMatch.stdout());
+
+    LookupResult withWordMatch = runLookup("--regular-expressions", "--word-match", "caf\\w");
+    assertEquals(0, withWordMatch.exitStatus(), withWordMatch.stderr());
+    assertEquals(entryFive + lineSep, withWordMatch.stdout());
   }
 
   // Invalid regular expressions
@@ -302,5 +373,29 @@ final class LookupTest {
     assertTrue(
         tooSmall.stderr().startsWith("Illegal --item-num 0, should be positive"),
         tooSmall.stderr());
+  }
+
+  /**
+   * Test that an out-of-range {@code --item-num} is diagnosed even when there is only one match.
+   * "prequx" appears in exactly one entry.
+   */
+  @Test
+  void testIllegalItemNumWithOneMatch() throws IOException, InterruptedException {
+    LookupResult tooLarge = runLookup("--item-num=5", "prequx");
+    assertEquals(1, tooLarge.exitStatus());
+    assertTrue(
+        tooLarge.stderr().startsWith("Illegal --item-num 5, should be <= 1"), tooLarge.stderr());
+    assertEquals("", tooLarge.stdout(), "should not also print the single match");
+
+    LookupResult tooSmall = runLookup("--item-num=0", "prequx");
+    assertEquals(1, tooSmall.exitStatus());
+    assertTrue(
+        tooSmall.stderr().startsWith("Illegal --item-num 0, should be positive"),
+        tooSmall.stderr());
+
+    // The one legal value still prints the single match.
+    LookupResult legal = runLookup("--item-num=1", "prequx");
+    assertEquals(0, legal.exitStatus(), legal.stderr());
+    assertEquals(entryThree + lineSep, legal.stdout());
   }
 }

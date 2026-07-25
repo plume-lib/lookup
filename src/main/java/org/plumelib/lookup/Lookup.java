@@ -75,10 +75,12 @@ import org.plumelib.util.RegexUtil;
  *             keywords are case-insensitive. [default: false]
  *         <li id="option:word-match"><b>-w</b> <b>--word-match=</b><i>boolean</i>. If true, match a
  *             keyword or regular expression only as a separate word, not as a substring of a word.
- *             This option may be supplied together with {@code --regular-expressions}. Beware that
- *             a search term whose first or last character is not a word character can never match;
- *             for example, {@code #define} matches nothing, because a word boundary must be
- *             preceded by a word character. [default: false]
+ *             This option may be supplied together with {@code --regular-expressions}.
+ *             <p>A search term whose first or last character is not a word character matches almost
+ *             nothing, because a word boundary that is adjacent to a non-word character requires a
+ *             word character on its other side. For example, {@code #define} would match
+ *             "abc#define" but not "#define X". Lookup reports an error rather than performing such
+ *             a search. [default: false]
  *       </ul>
  *   <li id="optiongroup:How-to-print-matches">How to print matches
  *       <ul>
@@ -126,7 +128,6 @@ import org.plumelib.util.RegexUtil;
  *
  * <!-- end options doc -->
  */
-@SuppressWarnings("deprecation") // uses deprecated classes in this package
 public final class Lookup {
 
   /** If true, produce diagnostic output. */
@@ -171,9 +172,12 @@ public final class Lookup {
 
   /**
    * If true, match a keyword or regular expression only as a separate word, not as a substring of a
-   * word. This option may be supplied together with {@code --regular-expressions}. Beware that a
-   * search term whose first or last character is not a word character can never match; for example,
-   * {@code #define} matches nothing, because a word boundary must be preceded by a word character.
+   * word. This option may be supplied together with {@code --regular-expressions}.
+   *
+   * <p>A search term whose first or last character is not a word character matches almost nothing,
+   * because a word boundary that is adjacent to a non-word character requires a word character on
+   * its other side. For example, {@code #define} would match "abc#define" but not "#define X".
+   * Lookup reports an error rather than performing such a search.
    */
   @Option("-w Only match search terms against complete words")
   public static boolean word_match = false;
@@ -343,9 +347,9 @@ public final class Lookup {
 
       // Precompute the regular expressions, for efficiency.
       int flags = case_sensitive ? 0 : (Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-      if (word_match) {
-        flags |= Pattern.UNICODE_CHARACTER_CLASS;
-      }
+      // Always use UNICODE_CHARACTER_CLASS, so that constructs such as `\b`, `\w`, and `\d` mean
+      // the same thing in a user-supplied regex whether or not --word-match is also supplied.
+      flags |= Pattern.UNICODE_CHARACTER_CLASS;
       List<Pattern> patterns = new ArrayList<>();
       if (regular_expressions) {
         for (String keyword : keywords) {
@@ -366,10 +370,14 @@ public final class Lookup {
                 keyword, RegexUtil.regexError(keywordRegex));
             System.exit(254);
           }
+          if (word_match) {
+            checkWordMatchable(keyword, flags, true);
+          }
           patterns.add(Pattern.compile(keywordRegex, flags));
         }
       } else if (word_match) {
         for (String keyword : keywords) {
+          checkWordMatchable(keyword, flags, false);
           String keywordRegex = "\\b" + Pattern.quote(keyword) + "\\b";
           patterns.add(Pattern.compile(keywordRegex, flags));
         }
@@ -429,9 +437,8 @@ public final class Lookup {
       int numMatchingEntries = matchingEntries.size();
       if (numMatchingEntries == 0) {
         System.out.println("Nothing found.");
-      } else if (numMatchingEntries == 1) {
-        printMatch(matchingEntries.get(0));
-      } else { // there are multiple matches
+      } else {
+        // Validate --item-num whenever it is supplied, even if there is only one match.
         if (item_num != null) {
           if (item_num < 1) {
             System.err.printf("Illegal --item-num %d, should be positive%n", item_num);
@@ -443,7 +450,9 @@ public final class Lookup {
             System.exit(1);
           }
           printMatch(matchingEntries.get(item_num - 1));
-        } else {
+        } else if (numMatchingEntries == 1) {
+          printMatch(matchingEntries.get(0));
+        } else { // there are multiple matches
           if (print_all) {
             System.out.printf("%d matches found (separated by dashes below)%n", numMatchingEntries);
           } else {
@@ -469,6 +478,80 @@ public final class Lookup {
         }
       }
     }
+  }
+
+  /**
+   * Characters that are special in a regular expression. A regular expression that starts or ends
+   * with one of these might still match a word character, so {@link #checkWordMatchable} draws no
+   * conclusion from it.
+   */
+  private static final String regexMetacharacters = "\\^$.|?*+()[]{}";
+
+  /**
+   * If {@code --word-match} would prevent {@code keyword} from matching anything useful, print an
+   * error message and exit.
+   *
+   * <p>{@code --word-match} wraps a search term in {@code \b}. A {@code \b} that is adjacent to a
+   * non-word character matches only when the character on the {@code \b}'s other side is a word
+   * character. So a search term that starts with a non-word character matches only immediately
+   * after a word character, and one that ends with a non-word character matches only immediately
+   * before one. For example, {@code \b(?:#define)\b} does not match "#define X", though it does
+   * match "abc#define". That is essentially never what a user wants, so diagnose it rather than
+   * silently reporting that nothing was found.
+   *
+   * <p>For a regular expression, this test is a heuristic: it diagnoses only a search term whose
+   * first or last character is unambiguously a literal non-word character. It never diagnoses a
+   * search term that might match a word character, because the diagnostic is fatal. For literal
+   * text, the test is exact.
+   *
+   * @param keyword the search term that the user supplied
+   * @param flags the flags with which the search term will be compiled
+   * @param isRegex true if the search term is a regular expression rather than literal text
+   */
+  private static void checkWordMatchable(String keyword, int flags, boolean isRegex) {
+    if (keyword.isEmpty() || (isRegex && keyword.indexOf('|') != -1)) {
+      // An empty search term has no first or last character.  In an alternation, a non-word
+      // character at either end of the regex need not be at that end of every match.
+      return;
+    }
+    Pattern wordCharacter = Pattern.compile("\\w", flags);
+    char first = keyword.charAt(0);
+    char last = keyword.charAt(keyword.length() - 1);
+    String position;
+    char offender;
+    if (isLiteralNonWordCharacter(first, isRegex, wordCharacter)) {
+      position = "starts";
+      offender = first;
+    } else if (isLiteralNonWordCharacter(last, isRegex, wordCharacter)) {
+      position = "ends";
+      offender = last;
+    } else {
+      return;
+    }
+    System.err.printf(
+        "Error: cannot apply --word-match to %s, which %s with non-word character '%c'.%n",
+        keyword, position, offender);
+    System.err.println(
+        "  A word boundary adjacent to a non-word character requires a word character on its other"
+            + " side, so the search would match almost nothing.");
+    System.exit(254);
+  }
+
+  /**
+   * Returns true if {@code c} is certainly matched literally and is not a word character.
+   *
+   * @param c the first or last character of a search term
+   * @param isRegex true if the search term is a regular expression rather than literal text
+   * @param wordCharacter a regular expression that matches one word character
+   * @return true if {@code c} is certainly a literal non-word character
+   */
+  private static boolean isLiteralNonWordCharacter(char c, boolean isRegex, Pattern wordCharacter) {
+    if (isRegex && regexMetacharacters.indexOf(c) != -1) {
+      // The character is special, so it might match a word character, or it might change what a
+      // neighboring character means.
+      return false;
+    }
+    return !wordCharacter.matcher(Character.toString(c)).matches();
   }
 
   /**
