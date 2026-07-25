@@ -300,6 +300,11 @@ public final class Lookup {
       System.err.println("Error: --include-re is not a regex with 1 group: " + include_re);
       System.exit(254);
     }
+    // The upper bound on --item-num depends on the number of matches, so it is checked later.
+    if (item_num != null && item_num < 1) {
+      System.err.printf("Illegal --item-num %d, should be positive%n", item_num);
+      System.exit(1);
+    }
 
     // If help was requested, print it and exit
     if (help) {
@@ -366,18 +371,18 @@ public final class Lookup {
             // Only --word-match can reach here: without it, keywordRegex is keyword, which was
             // checked above.  So blame --word-match, and do not claim that keyword is not a regex.
             System.err.printf(
-                "Error: cannot apply --word-match to regex %s: %s%n",
+                "Error: cannot apply --word-match to %s: %s%n",
                 keyword, RegexUtil.regexError(keywordRegex));
             System.exit(254);
           }
           if (word_match) {
-            checkWordMatchable(keyword, flags, true);
+            checkWordMatchable(keyword, true);
           }
           patterns.add(Pattern.compile(keywordRegex, flags));
         }
       } else if (word_match) {
         for (String keyword : keywords) {
-          checkWordMatchable(keyword, flags, false);
+          checkWordMatchable(keyword, false);
           String keywordRegex = "\\b" + Pattern.quote(keyword) + "\\b";
           patterns.add(Pattern.compile(keywordRegex, flags));
         }
@@ -438,12 +443,8 @@ public final class Lookup {
       if (numMatchingEntries == 0) {
         System.out.println("Nothing found.");
       } else {
-        // Validate --item-num whenever it is supplied, even if there is only one match.
+        // Check --item-num against the number of matches, even if there is only one match.
         if (item_num != null) {
-          if (item_num < 1) {
-            System.err.printf("Illegal --item-num %d, should be positive%n", item_num);
-            System.exit(1);
-          }
           if (item_num > numMatchingEntries) {
             System.err.printf(
                 "Illegal --item-num %d, should be <= %d%n", item_num, numMatchingEntries);
@@ -481,15 +482,23 @@ public final class Lookup {
   }
 
   /**
-   * Characters that are special in a regular expression. A regular expression that starts or ends
-   * with one of these might still match a word character, so {@link #checkWordMatchable} draws no
-   * conclusion from it.
+   * Characters that are special in a regular expression, outside a character class. A regular
+   * expression that starts or ends with one of these might still match a word character, so {@link
+   * #checkWordMatchable} draws no conclusion from it.
+   *
+   * <p>This list intentionally omits {@code -} and {@code &}, which are special only within a
+   * character class. A search term that starts or ends within a character class starts or ends with
+   * {@code [} or {@code ]}, which are in this list.
    */
   private static final String regexMetacharacters = "\\^$.|?*+()[]{}";
 
+  /** Matches one word character. */
+  private static final Pattern wordCharacter =
+      Pattern.compile("\\w", Pattern.UNICODE_CHARACTER_CLASS);
+
   /**
-   * If {@code --word-match} would prevent {@code keyword} from matching anything useful, print an
-   * error message and exit.
+   * If {@code --word-match} would prevent {@code keyword} from matching anything useful, prints an
+   * error message and exits.
    *
    * <p>{@code --word-match} wraps a search term in {@code \b}. A {@code \b} that is adjacent to a
    * non-word character matches only when the character on the {@code \b}'s other side is a word
@@ -505,31 +514,29 @@ public final class Lookup {
    * text, the test is exact.
    *
    * @param keyword the search term that the user supplied
-   * @param flags the flags with which the search term will be compiled
    * @param isRegex true if the search term is a regular expression rather than literal text
    */
-  private static void checkWordMatchable(String keyword, int flags, boolean isRegex) {
+  private static void checkWordMatchable(String keyword, boolean isRegex) {
     if (keyword.isEmpty() || (isRegex && keyword.indexOf('|') != -1)) {
       // An empty search term has no first or last character.  In an alternation, a non-word
       // character at either end of the regex need not be at that end of every match.
       return;
     }
-    Pattern wordCharacter = Pattern.compile("\\w", flags);
     int first = keyword.codePointAt(0);
     int last = keyword.codePointBefore(keyword.length());
     String position;
     int offender;
-    if (isLiteralNonWordCharacter(first, isRegex, wordCharacter)) {
+    if (isLiteralNonWordCharacter(first, isRegex)) {
       position = "starts";
       offender = first;
-    } else if (isLiteralNonWordCharacter(last, isRegex, wordCharacter)) {
+    } else if (isLiteralNonWordCharacter(last, isRegex)) {
       position = "ends";
       offender = last;
     } else {
       return;
     }
     System.err.printf(
-        "Error: cannot apply --word-match to %s, which %s with non-word character '%s'.%n",
+        "Error: cannot apply --word-match to %s: it %s with non-word character '%s'%n",
         keyword, position, Character.toString(offender));
     System.err.println(
         "  A word boundary adjacent to a non-word character requires a word character on its other"
@@ -542,10 +549,9 @@ public final class Lookup {
    *
    * @param c the first or last code point of a search term
    * @param isRegex true if the search term is a regular expression rather than literal text
-   * @param wordCharacter a regular expression that matches one word character
    * @return true if {@code c} is certainly a literal non-word character
    */
-  private static boolean isLiteralNonWordCharacter(int c, boolean isRegex, Pattern wordCharacter) {
+  private static boolean isLiteralNonWordCharacter(int c, boolean isRegex) {
     if (isRegex && regexMetacharacters.indexOf(c) != -1) {
       // The character is special, so it might match a word character, or it might change what a
       // neighboring character means.
@@ -555,7 +561,7 @@ public final class Lookup {
   }
 
   /**
-   * Print a matching entry: its location (if {@code --show-location} was supplied) followed by its
+   * Prints a matching entry: its location (if {@code --show-location} was supplied) followed by its
    * body.
    *
    * @param entry the entry to print

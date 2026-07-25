@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -59,6 +60,9 @@ final class LookupTest {
    */
   private static final String entryFive = "five: caf\u00e9 society";
 
+  /** The sixth entry of {@link #entryFile}. It contains a hyphenated word. */
+  private static final String entrySix = "six: a re-entrant lock";
+
   /** Write the entry file that the tests search. */
   @BeforeEach
   void writeEntryFile() throws IOException {
@@ -66,7 +70,19 @@ final class LookupTest {
     Files.writeString(
         entryFile,
         String.join(
-            "\n", entryOne, "", entryTwo, "", entryThree, "", entryFour, "", entryFive, ""));
+            "\n",
+            entryOne,
+            "",
+            entryTwo,
+            "",
+            entryThree,
+            "",
+            entryFour,
+            "",
+            entryFive,
+            "",
+            entrySix,
+            ""));
   }
 
   /**
@@ -87,12 +103,26 @@ final class LookupTest {
    * @throws InterruptedException if this thread is interrupted while awaiting the subprocess
    */
   private LookupResult runLookup(String... args) throws IOException, InterruptedException {
+    return runLookupOn(entryFile, args);
+  }
+
+  /**
+   * Run Lookup in a subprocess, searching the given file.
+   *
+   * @param searchFile the file to search
+   * @param args command-line arguments, not including {@code --entry-file}
+   * @return the exit status and output of the subprocess
+   * @throws IOException if the subprocess cannot be started or its output cannot be read
+   * @throws InterruptedException if this thread is interrupted while awaiting the subprocess
+   */
+  private LookupResult runLookupOn(Path searchFile, String... args)
+      throws IOException, InterruptedException {
     List<String> command = new ArrayList<>();
     command.add(Path.of(System.getProperty("java.home"), "bin", "java").toString());
     command.add("-cp");
     command.add(System.getProperty("java.class.path"));
     command.add(Lookup.class.getName());
-    command.add("--entry-file=" + entryFile);
+    command.add("--entry-file=" + searchFile);
     command.addAll(List.of(args));
 
     // Redirect to files rather than reading the subprocess's streams, which could deadlock.
@@ -102,7 +132,7 @@ final class LookupTest {
     builder.redirectOutput(stdoutFile.toFile());
     builder.redirectError(stderrFile.toFile());
     Process process = builder.start();
-    if (!process.waitFor(60, java.util.concurrent.TimeUnit.SECONDS)) {
+    if (!process.waitFor(60, TimeUnit.SECONDS)) {
       process.destroyForcibly();
       throw new AssertionError("Lookup subprocess timed out: " + command);
     }
@@ -193,8 +223,8 @@ final class LookupTest {
           result
               .stderr()
               .startsWith(
-                  "Error: cannot apply --word-match to #define, which starts with non-word"
-                      + " character '#'."),
+                  "Error: cannot apply --word-match to #define: it starts with non-word"
+                      + " character '#'"),
           result.stderr());
       assertEquals("", result.stdout(), "should not also report a search result");
     }
@@ -214,9 +244,29 @@ final class LookupTest {
         result
             .stderr()
             .startsWith(
-                "Error: cannot apply --word-match to foo-, which ends with non-word character"
-                    + " '-'."),
+                "Error: cannot apply --word-match to foo-: it ends with non-word character"
+                    + " '-'"),
         result.stderr());
+    assertEquals("", result.stdout(), "should not also report a search result");
+  }
+
+  /**
+   * Test that {@code --word-match} rejects a hyphenated search term, even though that search would
+   * have succeeded. This documents a deliberate tradeoff: {@code \bre-\b} does match "re-entrant",
+   * but the check rejects every search term that ends with a literal non-word character.
+   */
+  @Test
+  void testWordMatchRejectsHyphenatedTerm() throws IOException, InterruptedException {
+    LookupResult rejected = runLookup("--word-match", "re-");
+    assertEquals(254, rejected.exitStatus(), rejected.stderr());
+    assertTrue(
+        rejected.stderr().startsWith("Error: cannot apply --word-match to re-: it ends with"),
+        rejected.stderr());
+
+    // Without --word-match, the same search term is found.
+    LookupResult withoutWordMatch = runLookup("re-");
+    assertEquals(0, withoutWordMatch.exitStatus(), withoutWordMatch.stderr());
+    assertEquals(entrySix + lineSep, withoutWordMatch.stdout());
   }
 
   /**
@@ -255,6 +305,69 @@ final class LookupTest {
     assertEquals(entryFive + lineSep, withWordMatch.stdout());
   }
 
+  /** Test that an entry matches only if it contains every keyword. */
+  @Test
+  void testMultipleKeywords() throws IOException, InterruptedException {
+    // "bar" is a whole word only in entry one; "here" is a whole word in entries one and three.
+    LookupResult bothPresent = runLookup("--word-match", "bar", "here");
+    assertEquals(0, bothPresent.exitStatus(), bothPresent.stderr());
+    assertEquals(entryOne + lineSep, bothPresent.stdout());
+
+    // Each keyword matches an entry, but no entry contains both.
+    LookupResult noEntryHasBoth = runLookup("--word-match", "bar", "embargo");
+    assertEquals(0, noEntryHasBoth.exitStatus(), noEntryHasBoth.stderr());
+    assertEquals("Nothing found." + lineSep, noEntryHasBoth.stdout());
+  }
+
+  /** Test that {@code --case-sensitive} applies to a {@code --word-match} search. */
+  @Test
+  void testCaseSensitiveWordMatch() throws IOException, InterruptedException {
+    // Matching is case-insensitive by default.
+    LookupResult insensitive = runLookup("--word-match", "BAR");
+    assertEquals(0, insensitive.exitStatus(), insensitive.stderr());
+    assertEquals(entryOne + lineSep, insensitive.stdout());
+
+    LookupResult sensitiveMismatch = runLookup("--word-match", "--case-sensitive", "BAR");
+    assertEquals(0, sensitiveMismatch.exitStatus(), sensitiveMismatch.stderr());
+    assertEquals("Nothing found." + lineSep, sensitiveMismatch.stdout());
+
+    LookupResult sensitiveMatch = runLookup("--word-match", "--case-sensitive", "bar");
+    assertEquals(0, sensitiveMatch.exitStatus(), sensitiveMatch.stderr());
+    assertEquals(entryOne + lineSep, sensitiveMatch.stdout());
+  }
+
+  /**
+   * Test that {@code --search-body} searches the body of a long entry. Without {@code
+   * --search-body}, only the long entry's description (its first line) is searched.
+   */
+  @Test
+  void testSearchBody() throws IOException, InterruptedException {
+    Path longEntryFile = tempDir.resolve("long-entries");
+    Files.writeString(
+        longEntryFile,
+        """
+        >entry a long entry
+        its body mentions xyzzy
+        <entry
+        """);
+    // Lookup prints the whole body, with the ">entry " marker removed from the first line.
+    String body = "a long entry" + lineSep + "its body mentions xyzzy" + lineSep;
+
+    // The description is always searched.
+    LookupResult description = runLookupOn(longEntryFile, "long");
+    assertEquals(0, description.exitStatus(), description.stderr());
+    assertEquals(body, description.stdout());
+
+    // The body is not searched by default.
+    LookupResult withoutSearchBody = runLookupOn(longEntryFile, "xyzzy");
+    assertEquals(0, withoutSearchBody.exitStatus(), withoutSearchBody.stderr());
+    assertEquals("Nothing found." + lineSep, withoutSearchBody.stdout());
+
+    LookupResult withSearchBody = runLookupOn(longEntryFile, "--search-body", "xyzzy");
+    assertEquals(0, withSearchBody.exitStatus(), withSearchBody.stderr());
+    assertEquals(body, withSearchBody.stdout());
+  }
+
   // Invalid regular expressions
 
   /** Test that an invalid regular expression is diagnosed. */
@@ -276,7 +389,7 @@ final class LookupTest {
     assertEquals(254, result.exitStatus());
     // The message blames --word-match, which is what made the regex invalid.
     assertTrue(
-        result.stderr().startsWith("Error: cannot apply --word-match to regex \\Qfoo: "),
+        result.stderr().startsWith("Error: cannot apply --word-match to \\Qfoo: "),
         result.stderr());
     // The message shows the composed regex, and explains what is wrong with it.
     assertTrue(result.stderr().contains("\\b(?:\\Qfoo)\\b"), result.stderr());
@@ -401,5 +514,24 @@ final class LookupTest {
     LookupResult legal = runLookup("--item-num=1", "prequx");
     assertEquals(0, legal.exitStatus(), legal.stderr());
     assertEquals(entryThree + lineSep, legal.stdout());
+  }
+
+  /**
+   * Test that a non-positive {@code --item-num} is diagnosed even when nothing matches, since that
+   * value is illegal no matter how many matches there are. A positive {@code --item-num} cannot be
+   * checked against the number of matches, so it is accepted.
+   */
+  @Test
+  void testIllegalItemNumWithNoMatch() throws IOException, InterruptedException {
+    LookupResult tooSmall = runLookup("--item-num=0", "nonexistentkeyword");
+    assertEquals(1, tooSmall.exitStatus());
+    assertTrue(
+        tooSmall.stderr().startsWith("Illegal --item-num 0, should be positive"),
+        tooSmall.stderr());
+    assertEquals("", tooSmall.stdout(), "should not also report a search result");
+
+    LookupResult positive = runLookup("--item-num=5", "nonexistentkeyword");
+    assertEquals(0, positive.exitStatus(), positive.stderr());
+    assertEquals("Nothing found." + lineSep, positive.stdout());
   }
 }
