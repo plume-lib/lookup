@@ -200,7 +200,7 @@ final class LookupTest {
     LookupResult result = runLookup("--regular-expressions", "--word-match", "\\Qfoo");
     assertEquals(254, result.exitStatus());
     // The message names the search term the user supplied, not the composed regex.
-    assertEquals("Error: not a regex: \\Qfoo" + lineSep, result.stderr());
+    assertEquals("Error: not a regex: \\b\\Qfoo\\b" + lineSep, result.stderr());
     assertFalse(result.stderr().contains("Exception"), "unexpected stack trace");
 
     // Without --word-match, the same search term is a valid regex.
