@@ -53,13 +53,14 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 test {
+  outputs.upToDateWhen{false}
+
   useJUnitPlatform {
     includeEngines("junit-jupiter")
     excludeEngines("junit-vintage")
   }
 
   testLogging {
-    outputs.upToDateWhen{false}
     showStandardStreams = true
     events("failed")
     exceptionFormat = "full"
