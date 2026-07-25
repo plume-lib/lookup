@@ -102,7 +102,11 @@ final class LookupTest {
     builder.redirectOutput(stdoutFile.toFile());
     builder.redirectError(stderrFile.toFile());
     Process process = builder.start();
-    int exitStatus = process.waitFor();
+    if (!process.waitFor(60, java.util.concurrent.TimeUnit.SECONDS)) {
+      process.destroyForcibly();
+      throw new AssertionError("Lookup subprocess timed out: " + command);
+    }
+    int exitStatus = process.exitValue();
     return new LookupResult(exitStatus, Files.readString(stdoutFile), Files.readString(stderrFile));
   }
 
