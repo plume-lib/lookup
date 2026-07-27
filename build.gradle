@@ -24,11 +24,16 @@ plugins {
 }
 
 repositories {
-  mavenLocal()
+  // The snapshot repositories are restricted to snapshots, so that a stale
+  // artifact in one of them cannot shadow a release on Maven Central.  One
+  // consequence is that a locally-installed *release* build of, say, plume-util
+  // is ignored; install such a build as a snapshot to have this build use it.
+  mavenLocal {
+    mavenContent { snapshotsOnly() }
+  }
   mavenCentral()
   maven {
     url = "https://central.sonatype.com/repository/maven-snapshots/"
-    // Only snapshots live here, so don't search this repository for releases.
     mavenContent { snapshotsOnly() }
   }
 }
@@ -66,8 +71,8 @@ application {
 
 java {
   toolchain {
-    // Always compile using Java 21, but test using various Java versions.
-    // (The test task overrides this toolchain; see the "test" task below.)
+    // Always compile using Java 21.  The "test" task below overrides this for
+    // test execution, so that tests run under various Java versions.
     languageVersion = JavaLanguageVersion.of(21)
   }
 }
@@ -112,8 +117,9 @@ tasks.named("test", Test) {
   }
 
   testLogging {
-    showStandardStreams = true
-    events("failed")
+    // `showStandardStreams = true` would be a redundant way to say the same
+    // thing as including the "standardOut" and "standardError" events here.
+    events("skipped", "failed", "standardOut", "standardError")
     exceptionFormat = "full"
   }
 
@@ -133,9 +139,9 @@ tasks.named("jacocoTestReport", JacocoReport) {
 }
 
 spotless {
-  format "misc", {
-    // define the files to apply `misc` to
-    target("*.md", ".gitignore")
+  format("misc") {
+    // Define the files to apply `misc` to.  prek handles `.gitignore`.
+    target("**/*.md")
 
     // define the steps to apply to those files
     trimTrailingWhitespace()
@@ -149,11 +155,13 @@ spotless {
   groovyGradle {
     // No "target" call: this block defaults to "*.gradle" in the project
     // directory, which is build.gradle and settings.gradle.
-    greclipse()
-    .cacheDirectory("${gradle.gradleUserHomeDir}/p2-data")
-    .withP2Mirrors([
+
+    def greclipseConfig = greclipse(libs.versions.greclipse.get())
+    // Name the cache directory rather than accepting Spotless's default, which
+    // has moved between Spotless versions and which is not documented as being stable.
+    greclipseConfig.cacheDirectory(new File(gradle.gradleUserHomeDir, "spotless-p2"))
+    greclipseConfig.withP2Mirrors([
       "https://download.eclipse.org/": "https://mirror.umd.edu/eclipse/",
-      // Groovy-Eclipse is published only here, so map this repository to itself.
       "https://groovy.jfrog.io/": "https://groovy.jfrog.io/",
     ])
 
@@ -229,14 +237,12 @@ tasks.named("javadoc", Javadoc) { javadocTask ->
   // Turn Javadoc warnings into errors.
   options.addBooleanOption("Xwerror", true)
   options.addBooleanOption("Xdoclint:all", true)
-  // Document private members too, so that doclint checks their documentation.
-  options.memberLevel = JavadocMemberLevel.PRIVATE
   options.quiet()
   stripDejavuFontImport(javadocTask)
 }
 
 tasks.register("javadocWeb") {
-  group = "Documentation"
+  group = "documentation"
   description = "Upload API documentation to website."
   dependsOn("javadocWebUpload", "javadocWebChgrp", "javadocWebChmod")
 }
@@ -264,9 +270,6 @@ tasks.register("javadocWebChmod", Exec) {
   ignoreExitValue = true
 }
 
-// This tool-only classpath, its dependency, and the task that uses it are
-// declared together, rather than in the "dependencies" block near the top of
-// this file, to keep the three parts of "requireJavadoc" in one place.
 configurations {
   requireJavadoc
 }
@@ -275,7 +278,7 @@ dependencies {
 }
 def requireJavadocStamp = layout.buildDirectory.file("requireJavadoc.stamp")
 tasks.register("requireJavadoc", JavaExec) {
-  group = "Documentation"
+  group = "documentation"
   description = "Ensures that Javadoc documentation exists."
   inputs.files(sourceSets.main.allJava)
   // Without a declared output, this task would never be up to date, so it would
@@ -310,7 +313,7 @@ tasks.register("updateUserOptions", Javadoc) {
   // part is built by "classes".  (Depending on "assemble" would also build the
   // jar and the fat jar, neither of which this task reads.)
   dependsOn("classes")
-  group = "Documentation"
+  group = "documentation"
   description = "Updates printed documentation of command-line arguments."
   source = sourceSets.main.allJava.files.sort()
   classpath = project.sourceSets.main.compileClasspath
@@ -334,12 +337,11 @@ tasks.register("updateUserOptions", Javadoc) {
   }
 }
 
-
 // Emacs support
 
 /* Make Emacs TAGS table */
 tasks.register("tags", Exec) {
-  group = "Development"
   description = "Run etags to create an Emacs TAGS table"
-  commandLine("bash", "-c", "find src/ -name '*.java' | sort | xargs etags")
+  group = "IDE"
+  commandLine("bash", "-c", "find src/ \\( -name '*.java' -o -name '*.sh' \\) | sort | xargs etags")
 }
