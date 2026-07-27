@@ -24,10 +24,12 @@ plugins {
 }
 
 repositories {
-  // The snapshot repositories are restricted to snapshots, so that a stale
-  // artifact in one of them cannot shadow a release on Maven Central.  One
-  // consequence is that a locally-installed *release* build of, say, plume-util
-  // is ignored; install such a build as a snapshot to have this build use it.
+  // mavenLocal() comes first so that a locally-installed snapshot takes
+  // precedence.  Restricting this to snapshots prevents a stale
+  // locally-installed non-snapshot release from shadowing the one on Maven
+  // Central.  One consequence is that a locally-installed *release* build of,
+  // say, plume-util is ignored.  To build against a locally-installed release,
+  // temporarily remove "snapshotsOnly()" OR install such a build as a snapshot.
   mavenLocal {
     mavenContent { snapshotsOnly() }
   }
@@ -78,7 +80,6 @@ java {
 }
 
 tasks.withType(JavaCompile).configureEach {
-  // Set the language level and byte code to 17.
   options.release = 17
 
   // Gradle compiles in a worker process whenever the toolchain above differs
@@ -99,6 +100,8 @@ tasks.withType(JavaCompile).configureEach {
     disable("ReferenceEquality") // Use Interning Checker instead.
   }
 }
+
+// Testing
 
 tasks.named("test", Test) {
   // Run the tests under the JVM that is running Gradle, rather than under the
@@ -138,6 +141,8 @@ tasks.named("jacocoTestReport", JacocoReport) {
   }
 }
 
+// Code formatting
+
 spotless {
   format("misc") {
     // Define the files to apply `misc` to.  prek handles `.gitignore`.
@@ -153,8 +158,7 @@ spotless {
     formatAnnotations()
   }
   groovyGradle {
-    // No "target" call: this block defaults to "*.gradle" in the project
-    // directory, which is build.gradle and settings.gradle.
+    target("**/*.gradle")
 
     def greclipseConfig = greclipse(libs.versions.greclipse.get())
     // Name the cache directory rather than accepting Spotless's default, which
@@ -176,11 +180,9 @@ spotless {
 
 pmd {
   toolVersion = libs.versions.pmd.get()
+  ruleSets = []                 // Prevent the default errorprone.xml from being applied.
   ruleSetFiles = files("${rootDir}/.pmd-ruleset.xml")
   consoleOutput = true
-}
-tasks.named("pmdTest") {
-  enabled = false
 }
 
 

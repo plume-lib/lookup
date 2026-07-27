@@ -39,7 +39,9 @@ jobs:
       contents: read # Claude cannot push or merge; it can only comment.
       pull-requests: write # To comment on pull requests.
       issues: write # To comment on issues, which the `issues` event triggers on.
-      id-token: write
+      # No "id-token: write".  The action requests an OIDC token only to trade
+      # it for a Claude GitHub App token, and "github_token" below skips that
+      # exchange.
       actions: read # Required for Claude to read CI results on PRs
     steps:
       - name: Checkout repository
