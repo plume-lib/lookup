@@ -2,7 +2,8 @@ plugins {
   id("java")
   id("application")
 
-  // To create a fat jar build/libs/...-all.jar, run: ./gradlew shadowJar
+  // Creates the fat jar build/libs/...-all.jar as part of "assemble".
+  // To create only that jar, run: ./gradlew shadowJar
   alias(libs.plugins.com.gradleup.shadow)
 
   // Code formatting; defines targets "spotlessApply" and "spotlessCheck"
@@ -46,6 +47,21 @@ application {
   mainClass = "org.plumelib.lookup.Lookup"
 }
 
+// The "application" and "shadow" plugins each add a distribution -- a .tar and
+// a .zip holding the jar, its dependencies, and start scripts -- to "assemble",
+// which "build" runs.  This project ships jars rather than distributions, so
+// writing about 8 MB of archives on every build is wasted work.
+[
+  "distTar",
+  "distZip",
+  "shadowDistTar",
+  "shadowDistZip"
+].each { taskName ->
+  tasks.named(taskName) {
+    enabled = false
+  }
+}
+
 java {
   toolchain {
     // Always compile using Java 21, but test using various Java versions.
@@ -62,9 +78,9 @@ tasks.withType(JavaCompile).configureEach {
   // from the JVM that runs Gradle.  That worker does not inherit the
   // `org.gradle.jvmargs` heap setting in gradle.properties, so set it here too.
   options.forkOptions.jvmArgs += "-Xmx6g"
-  options.compilerArgs << "-Werror"
+  options.compilerArgs += "-Werror"
   // "-processing" avoids javac warning "No processor claimed any of these annotations".
-  options.compilerArgs << "-Xlint:all,-processing"
+  options.compilerArgs += "-Xlint:all,-processing"
 
   // Error Prone linter
   options.errorprone {
@@ -82,10 +98,11 @@ tasks.named("test", Test) {
   // Java 21 toolchain that is used for compilation.  Without this, every entry
   // of the continuous integration Java version matrix would test Java 21 only.
   javaLauncher = javaToolchains.launcherFor {
-    languageVersion = JavaLanguageVersion.of(JavaVersion.current().majorVersion)
+    languageVersion = JavaLanguageVersion.of(Runtime.version().feature())
   }
 
-  outputs.upToDateWhen{false}
+  outputs.upToDateWhen { false }
+  outputs.cacheIf { false }
 
   useJUnitPlatform {
     includeEngines("junit-jupiter")
@@ -98,11 +115,8 @@ tasks.named("test", Test) {
     exceptionFormat = "full"
   }
 
-  // Two possible configurations:
-  // Configuration A: report is always generated after tests run.
+  // Generate the coverage report after the tests run.
   finalizedBy(tasks.named("jacocoTestReport"))
-  // Configuration B: user must run `jacocoTestReport` explicitly.
-  // Delete the `finalizedBy` line above.
 }
 
 jacoco {
@@ -127,19 +141,15 @@ spotless {
     endWithNewline()
   }
   java {
-    targetExclude("**/WeakIdentityHashMap.java")
     googleJavaFormat(libs.versions.google.java.format.get())
     formatAnnotations()
   }
-  // eclipse.org flakiness leads to "Failed to provision P2 dependencies".
-  if (false) {
-    groovyGradle {
-      target("**/*.gradle")
-      greclipse()  // which formatter Spotless should use to format .gradle files.
-      leadingTabsToSpaces(2)
-      trimTrailingWhitespace()
-      // endWithNewline() // Don't want to end empty files with a newline
-    }
+  groovyGradle {
+    target("**/*.gradle")
+    greclipse()  // which formatter Spotless should use to format .gradle files.
+    leadingTabsToSpaces(2)
+    trimTrailingWhitespace()
+    // endWithNewline() // Don't want to end empty files with a newline
   }
 }
 
@@ -150,8 +160,6 @@ pmd {
   toolVersion = libs.versions.pmd.get()
   ruleSetFiles = files("${rootDir}/.pmd-ruleset.xml")
   consoleOutput = true
-  ignoreFailures = false
-  incrementalAnalysis = true
 }
 tasks.named("pmdTest") {
   enabled = false
@@ -193,16 +201,28 @@ checkerFramework {
 tasks.withType(Javadoc).configureEach {
   options.noTimestamp = true
 }
-tasks.named("javadoc", Javadoc) {
-  // Turn Javadoc warnings into errors.
-  options.addStringOption("Xwerror", "-Xdoclint:all")
-  options.addStringOption("private", "-quiet")
-  doLast {
-    ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:"",
-    flags:"g", byline:true) {
-      fileset(dir: destinationDir)
+
+// Removes the generated stylesheet's `@import` of a DejaVu font file.  Javadoc
+// writes no "resources/fonts" directory, so the import would be a broken link.
+// This is not applied to every Javadoc task; "updateUserOptions" rewrites a
+// source file rather than producing a documentation tree.
+def stripDejavuFontImport = { Javadoc javadocTask ->
+  javadocTask.doLast {
+    ant.replaceregexp(match: "@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace: "",
+    flags: "g", byline: true) {
+      fileset(dir: javadocTask.destinationDir)
     }
   }
+}
+
+tasks.named("javadoc", Javadoc) { javadocTask ->
+  // Turn Javadoc warnings into errors.
+  options.addBooleanOption("Xwerror", true)
+  options.addBooleanOption("Xdoclint:all", true)
+  // Document private members too, so that doclint checks their documentation.
+  options.memberLevel = JavadocMemberLevel.PRIVATE
+  options.quiet()
+  stripDejavuFontImport(javadocTask)
 }
 
 tasks.register("javadocWeb") {
@@ -212,18 +232,13 @@ tasks.register("javadocWeb") {
 }
 // The three tasks below are steps of "javadocWeb", so they have no group and
 // thus do not appear in the output of `./gradlew tasks`.
-tasks.register("javadocWebUpload", Javadoc) {
+tasks.register("javadocWebUpload", Javadoc) { javadocTask ->
   description = "Write API documentation to the website directory."
   dependsOn("requireJavadoc")
   source = sourceSets.main.allJava
   destinationDir = file("/cse/web/research/plumelib/${project.name}/api")
   classpath = project.sourceSets.main.compileClasspath
-  doLast {
-    ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:"",
-    flags:"g", byline:true) {
-      fileset(dir: destinationDir)
-    }
-  }
+  stripDejavuFontImport(javadocTask)
 }
 // Set permissions
 tasks.register("javadocWebChgrp", Exec) {
@@ -239,20 +254,27 @@ tasks.register("javadocWebChmod", Exec) {
   ignoreExitValue = true
 }
 
-
+// This tool-only classpath, its dependency, and the task that uses it are
+// declared together, rather than in the "dependencies" block near the top of
+// this file, to keep the three parts of "requireJavadoc" in one place.
 configurations {
   requireJavadoc
 }
 dependencies {
   requireJavadoc(libs.require.javadoc)
 }
+def requireJavadocStamp = layout.buildDirectory.file("requireJavadoc.stamp")
 tasks.register("requireJavadoc", JavaExec) {
   group = "Documentation"
   description = "Ensures that Javadoc documentation exists."
   inputs.files(sourceSets.main.allJava)
+  // Without a declared output, this task would never be up to date, so it would
+  // re-run on every build.  The file's contents do not matter; only its
+  // existence and timestamp do.
+  outputs.file(requireJavadocStamp)
   mainClass = "org.plumelib.javadoc.RequireJavadoc"
   classpath = configurations.requireJavadoc
-  args(sourceSets.main.allJava.srcDirs.collect{it.getAbsolutePath()})
+  args(sourceSets.main.allJava.srcDirs.collect { it.absolutePath })
   jvmArgs += [
     "--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
     "--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
@@ -263,6 +285,11 @@ tasks.register("requireJavadoc", JavaExec) {
     "--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
     "--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
   ]
+  // Runs only if the tool found no problems, so that a failure does not leave
+  // behind a stamp file that would mark this task up to date.
+  doLast {
+    requireJavadocStamp.get().asFile.text = ""
+  }
 }
 tasks.named("check") {
   dependsOn("javadoc", "requireJavadoc")
@@ -275,15 +302,25 @@ tasks.register("updateUserOptions", Javadoc) {
   source = sourceSets.main.allJava.files.sort()
   classpath = project.sourceSets.main.compileClasspath
   options.memberLevel = JavadocMemberLevel.PRIVATE
-  options.docletpath = project.sourceSets.main.runtimeClasspath as List
   options.doclet = "org.plumelib.options.OptionsDoclet"
   options.addStringOption("docfile", "${projectDir}/src/main/java/org/plumelib/lookup/Lookup.java")
   options.addStringOption("format", "javadoc")
-  options.addStringOption("i", "-quiet")
+  // OptionsDoclet's "-i" means "edit the docfile in place"; it takes no value.
+  options.addBooleanOption("i", true)
+  options.quiet()
   // Overrides the blanket `noTimestamp = true` in the `withType(Javadoc)` block above.
   options.noTimestamp(false)
   title = ""
+  // "docletpath" is a List<File>, so setting it resolves the runtime classpath.
+  // Do that when the task runs, not while this file is being evaluated, so that
+  // merely realizing the task -- as `./gradlew tasks` and an IDE import do --
+  // does not resolve dependencies.
+  def mainRuntimeClasspath = sourceSets.main.runtimeClasspath
+  doFirst {
+    options.docletpath = mainRuntimeClasspath.files as List
+  }
 }
+
 
 // Emacs support
 

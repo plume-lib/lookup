@@ -37,7 +37,9 @@ error-prone-core = { module = "com.google.errorprone:error_prone_core", version 
 google-java-format = { module = "com.google.googlejavaformat:google-java-format", version.ref = "google-java-format" }
 
 # Version number is used, library is not; see the comment on "checker-framework" above.
-jacoco = { module = "org.jacoco:org.jacoco.core", version.ref = "jacoco" }
+# Gradle's JaCoCo plugin resolves "org.jacoco.agent" and "org.jacoco.ant", both
+# of which are released in lockstep with the rest of JaCoCo.
+jacoco = { module = "org.jacoco:org.jacoco.agent", version.ref = "jacoco" }
 
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
 
