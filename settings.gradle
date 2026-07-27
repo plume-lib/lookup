@@ -1,5 +1,14 @@
-// No Java version check is needed here: Gradle itself refuses to run on a
-// JDK older than the version that this build requires.
+plugins {
+  // Supplies a download repository for Java toolchains.  Without this, a
+  // machine that lacks the JDK that `java.toolchain` requests (see
+  // build.gradle) fails the build rather than provisioning that JDK.
+  // The version cannot come from gradle/libs.versions.toml, because the
+  // version catalog does not exist yet while settings.gradle is evaluated.
+  id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
+// No check of the Gradle JVM's version is needed here: Gradle itself refuses to
+// run on a JDK older than the version that this build requires.
 
 // Project name is read-only in build scripts, and defaults to directory name.
 rootProject.name = "lookup"

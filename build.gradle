@@ -25,7 +25,11 @@ plugins {
 repositories {
   mavenLocal()
   mavenCentral()
-  maven { url = "https://central.sonatype.com/repository/maven-snapshots/" }
+  maven {
+    url = "https://central.sonatype.com/repository/maven-snapshots/"
+    // Only snapshots live here, so don't search this repository for releases.
+    mavenContent { snapshotsOnly() }
+  }
 }
 
 dependencies {
@@ -54,6 +58,9 @@ tasks.withType(JavaCompile).configureEach {
   // Set the language level and byte code to 17.
   options.release = 17
 
+  // Gradle compiles in a worker process whenever the toolchain above differs
+  // from the JVM that runs Gradle.  That worker does not inherit the
+  // `org.gradle.jvmargs` heap setting in gradle.properties, so set it here too.
   options.forkOptions.jvmArgs += "-Xmx6g"
   options.compilerArgs << "-Werror"
   // "-processing" avoids javac warning "No processor claimed any of these annotations".
@@ -197,15 +204,16 @@ tasks.named("javadoc", Javadoc) {
     }
   }
 }
-tasks.named("check") {
-  dependsOn("javadoc")
-}
 
 tasks.register("javadocWeb") {
+  group = "Documentation"
   description = "Upload API documentation to website."
   dependsOn("javadocWebUpload", "javadocWebChgrp", "javadocWebChmod")
 }
+// The three tasks below are steps of "javadocWeb", so they have no group and
+// thus do not appear in the output of `./gradlew tasks`.
 tasks.register("javadocWebUpload", Javadoc) {
+  description = "Write API documentation to the website directory."
   dependsOn("requireJavadoc")
   source = sourceSets.main.allJava
   destinationDir = file("/cse/web/research/plumelib/${project.name}/api")
@@ -219,11 +227,13 @@ tasks.register("javadocWebUpload", Javadoc) {
 }
 // Set permissions
 tasks.register("javadocWebChgrp", Exec) {
+  description = "Set the Unix group of the website's API documentation."
   mustRunAfter("javadocWebUpload")
   commandLine("chgrp", "-R",  "plse_www", "/cse/web/research/plumelib/${project.name}/api")
   ignoreExitValue = true
 }
 tasks.register("javadocWebChmod", Exec) {
+  description = "Set the Unix permissions of the website's API documentation."
   mustRunAfter("javadocWebUpload")
   commandLine("chmod", "-R",  "g+w", "/cse/web/research/plumelib/${project.name}/api")
   ignoreExitValue = true
@@ -255,11 +265,12 @@ tasks.register("requireJavadoc", JavaExec) {
   ]
 }
 tasks.named("check") {
-  dependsOn("requireJavadoc")
+  dependsOn("javadoc", "requireJavadoc")
 }
 
 tasks.register("updateUserOptions", Javadoc) {
   dependsOn("assemble")
+  group = "Documentation"
   description = "Updates printed documentation of command-line arguments."
   source = sourceSets.main.allJava.files.sort()
   classpath = project.sourceSets.main.compileClasspath
@@ -278,6 +289,7 @@ tasks.register("updateUserOptions", Javadoc) {
 
 /* Make Emacs TAGS table */
 tasks.register("tags", Exec) {
+  group = "Development"
   description = "Run etags to create an Emacs TAGS table"
   commandLine("bash", "-c", "find src/ -name '*.java' | sort | xargs etags")
 }
