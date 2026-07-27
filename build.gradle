@@ -10,7 +10,7 @@ plugins {
   alias(libs.plugins.com.diffplug.spotless)
 
   // Error Prone linter
-  alias(libs.plugins.net.ltgt.errorprone) apply false
+  alias(libs.plugins.net.ltgt.errorprone)
 
   // PMD linter
   id("pmd")
@@ -26,12 +26,13 @@ repositories {
   mavenLocal()
   mavenCentral()
   maven { url = "https://central.sonatype.com/repository/maven-snapshots/" }
-  gradlePluginPortal()
 }
 
 dependencies {
   implementation(libs.options)
   implementation(libs.plume.util)
+
+  errorprone(libs.error.prone.core)
 
   testImplementation(libs.junit.jupiter)
   testRuntimeOnly(libs.junit.platform.launcher)
@@ -44,15 +45,39 @@ application {
 java {
   toolchain {
     // Always compile using Java 21, but test using various Java versions.
+    // (The test task overrides this toolchain; see the "test" task below.)
     languageVersion = JavaLanguageVersion.of(21)
   }
 }
+
 tasks.withType(JavaCompile).configureEach {
   // Set the language level and byte code to 17.
   options.release = 17
+
+  options.forkOptions.jvmArgs += "-Xmx6g"
+  options.compilerArgs << "-Werror"
+  // "-processing" avoids javac warning "No processor claimed any of these annotations".
+  options.compilerArgs << "-Xlint:all,-processing"
+
+  // Error Prone linter
+  options.errorprone {
+    disable("AnnotateFormatMethod") // Error Prone doesn't know about Checker Framework @FormatMethod.
+    disable("DoNotCallSuggester") // Suggests use of an Error Prone annotation.
+    disable("EffectivelyPrivate") // Loses information about the abstraction.
+    disable("ExtendsObject")  // Incorrect when using the Checker Framework.
+    disable("InlineMeSuggester") // Using `@InlineMe` requires clients to declare a dependency on error_prone_annotations.
+    disable("ReferenceEquality") // Use Interning Checker instead.
+  }
 }
 
-test {
+tasks.named("test", Test) {
+  // Run the tests under the JVM that is running Gradle, rather than under the
+  // Java 21 toolchain that is used for compilation.  Without this, every entry
+  // of the continuous integration Java version matrix would test Java 21 only.
+  javaLauncher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(JavaVersion.current().majorVersion)
+  }
+
   outputs.upToDateWhen{false}
 
   useJUnitPlatform {
@@ -65,20 +90,24 @@ test {
     events("failed")
     exceptionFormat = "full"
   }
+
+  // Two possible configurations:
+  // Configuration A: report is always generated after tests run.
+  finalizedBy(tasks.named("jacocoTestReport"))
+  // Configuration B: user must run `jacocoTestReport` explicitly.
+  // Delete the `finalizedBy` line above.
 }
 
-jacocoTestReport {
+jacoco {
+  toolVersion = libs.versions.jacoco.get()
+}
+tasks.named("jacocoTestReport", JacocoReport) {
   reports {
     xml.required = false
     csv.required = true // Output is written to build/reports/jacoco/test/jacocoTestReport.csv
     html.required = true // Output is written to build/reports/jacoco/test/html/index.html
   }
 }
-// Two possible configurations:
-// Configuration A: report is always generated after tests run.
-test.finalizedBy(jacocoTestReport)
-// Configuration B: user must run `jacocoTestReport` explicitly.
-// jacocoTestReport.dependsOn(test)
 
 spotless {
   format "misc", {
@@ -92,7 +121,7 @@ spotless {
   }
   java {
     targetExclude("**/WeakIdentityHashMap.java")
-    googleJavaFormat()
+    googleJavaFormat(libs.versions.google.java.format.get())
     formatAnnotations()
   }
   // eclipse.org flakiness leads to "Failed to provision P2 dependencies".
@@ -107,48 +136,25 @@ spotless {
   }
 }
 
-// Error Prone linter
-
-tasks.withType(JavaCompile).configureEach {
-  options.forkOptions.jvmArgs += "-Xmx6g"
-  options.compilerArgs << "-Werror"
-  // "-processing" avoids javac warning "No processor claimed any of these annotations".
-  options.compilerArgs << "-Xlint:all,-processing"
-}
-apply plugin: "net.ltgt.errorprone"
-dependencies {
-  errorprone(libs.error.prone.core)
-}
-tasks.withType(JavaCompile).configureEach {
-  options.errorprone {
-    disable("AnnotateFormatMethod") // Error Prone doesn't know about Checker Framework @FormatMethod.
-    disable("DoNotCallSuggester") // Suggests use of an Error Prone annotation.
-    disable("EffectivelyPrivate") // Loses information about the abstraction.
-    disable("ExtendsObject")  // Incorrect when using the Checker Framework.
-    disable("InlineMeSuggester") // Using `@InlineMe` requires clients to declare a dependency on error_prone_annotations.
-    disable("ReferenceEquality") // Use Interning Checker instead.
-  }
-}
-
 
 // PMD linter
 
 pmd {
-  toolVersion = "7.26.0"
+  toolVersion = libs.versions.pmd.get()
   ruleSetFiles = files("${rootDir}/.pmd-ruleset.xml")
   consoleOutput = true
   ignoreFailures = false
   incrementalAnalysis = true
 }
-pmdTest.enabled = false
+tasks.named("pmdTest") {
+  enabled = false
+}
 
 
 // Checker Framework pluggable type-checking
 
-apply plugin: "org.checkerframework"
-
 checkerFramework {
-  version = libs.checker.framework.get().version
+  version = libs.versions.checker.framework.get()
   checkers = [
     // No need to run CalledMethodsChecker, because ResourceLeakChecker does so.
     // "org.checkerframework.checker.calledmethods.CalledMethodsChecker",
@@ -177,10 +183,10 @@ checkerFramework {
 
 // Javadoc
 
-tasks.withType(Javadoc) {
+tasks.withType(Javadoc).configureEach {
   options.noTimestamp = true
 }
-javadoc {
+tasks.named("javadoc", Javadoc) {
   // Turn Javadoc warnings into errors.
   options.addStringOption("Xwerror", "-Xdoclint:all")
   options.addStringOption("private", "-quiet")
@@ -191,13 +197,16 @@ javadoc {
     }
   }
 }
-check.dependsOn(javadoc)
+tasks.named("check") {
+  dependsOn("javadoc")
+}
 
-tasks.register("javadocWeb", Javadoc) {
+tasks.register("javadocWeb") {
   description = "Upload API documentation to website."
   dependsOn("javadocWebUpload", "javadocWebChgrp", "javadocWebChmod")
 }
 tasks.register("javadocWebUpload", Javadoc) {
+  dependsOn("requireJavadoc")
   source = sourceSets.main.allJava
   destinationDir = file("/cse/web/research/plumelib/${project.name}/api")
   classpath = project.sourceSets.main.compileClasspath
@@ -210,15 +219,15 @@ tasks.register("javadocWebUpload", Javadoc) {
 }
 // Set permissions
 tasks.register("javadocWebChgrp", Exec) {
+  mustRunAfter("javadocWebUpload")
   commandLine("chgrp", "-R",  "plse_www", "/cse/web/research/plumelib/${project.name}/api")
   ignoreExitValue = true
 }
-javadocWebChgrp.mustRunAfter("javadocWebUpload")
 tasks.register("javadocWebChmod", Exec) {
+  mustRunAfter("javadocWebUpload")
   commandLine("chmod", "-R",  "g+w", "/cse/web/research/plumelib/${project.name}/api")
   ignoreExitValue = true
 }
-javadocWebChmod.mustRunAfter("javadocWebUpload")
 
 
 configurations {
@@ -227,7 +236,7 @@ configurations {
 dependencies {
   requireJavadoc(libs.require.javadoc)
 }
-def requireJavadoc = tasks.register("requireJavadoc", JavaExec) {
+tasks.register("requireJavadoc", JavaExec) {
   group = "Documentation"
   description = "Ensures that Javadoc documentation exists."
   inputs.files(sourceSets.main.allJava)
@@ -245,8 +254,9 @@ def requireJavadoc = tasks.register("requireJavadoc", JavaExec) {
     "--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
   ]
 }
-check.dependsOn(requireJavadoc)
-javadocWeb.dependsOn(requireJavadoc)
+tasks.named("check") {
+  dependsOn("requireJavadoc")
+}
 
 tasks.register("updateUserOptions", Javadoc) {
   dependsOn("assemble")
@@ -259,6 +269,7 @@ tasks.register("updateUserOptions", Javadoc) {
   options.addStringOption("docfile", "${projectDir}/src/main/java/org/plumelib/lookup/Lookup.java")
   options.addStringOption("format", "javadoc")
   options.addStringOption("i", "-quiet")
+  // Overrides the blanket `noTimestamp = true` in the `withType(Javadoc)` block above.
   options.noTimestamp(false)
   title = ""
 }

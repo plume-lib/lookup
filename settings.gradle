@@ -1,8 +1,5 @@
-buildscript {
-  if (JavaVersion.current() < JavaVersion.VERSION_17) {
-    throw new GradleException("Use Java 17 or later.")
-  }
-}
+// No Java version check is needed here: Gradle itself refuses to run on a
+// JDK older than the version that this build requires.
 
 // Project name is read-only in build scripts, and defaults to directory name.
 rootProject.name = "lookup"
