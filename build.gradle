@@ -51,6 +51,8 @@ application {
 // a .zip holding the jar, its dependencies, and start scripts -- to "assemble",
 // which "build" runs.  This project ships jars rather than distributions, so
 // writing about 8 MB of archives on every build is wasted work.
+// Disabling a task does not skip its dependencies, so "startScripts" and
+// "startShadowScripts" still run; "installDist" and "installShadowDist" need them.
 [
   "distTar",
   "distZip",
@@ -145,15 +147,15 @@ spotless {
     formatAnnotations()
   }
   groovyGradle {
-    target("**/*.gradle")
-
+    // No "target" call: this block defaults to "*.gradle" in the project
+    // directory, which is build.gradle and settings.gradle.
     greclipse()
-        .cacheDirectory("${gradle.gradleUserHomeDir}/p2-data")
-        .withP2Mirrors([
-          "https://download.eclipse.org/": "https://mirror.umd.edu/eclipse/",
-          // Groovy-Eclipse is published only here, so map this repository to itself.
-          "https://groovy.jfrog.io/": "https://groovy.jfrog.io/",
-        ])
+    .cacheDirectory("${gradle.gradleUserHomeDir}/p2-data")
+    .withP2Mirrors([
+      "https://download.eclipse.org/": "https://mirror.umd.edu/eclipse/",
+      // Groovy-Eclipse is published only here, so map this repository to itself.
+      "https://groovy.jfrog.io/": "https://groovy.jfrog.io/",
+    ])
 
     leadingTabsToSpaces(2)
     trimTrailingWhitespace()
@@ -304,7 +306,10 @@ tasks.named("check") {
 }
 
 tasks.register("updateUserOptions", Javadoc) {
-  dependsOn("assemble")
+  // "docletpath" below reads sourceSets.main.runtimeClasspath, whose project
+  // part is built by "classes".  (Depending on "assemble" would also build the
+  // jar and the fat jar, neither of which this task reads.)
+  dependsOn("classes")
   group = "Documentation"
   description = "Updates printed documentation of command-line arguments."
   source = sourceSets.main.allJava.files.sort()
