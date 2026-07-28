@@ -4,6 +4,10 @@ checker-framework = "4.2.1"
 
 google-java-format = "1.28.0"
 
+# The Groovy-Eclipse formatter.
+# Spotless permits version 4.36 on JVM 17+ and version 4.40 on JVM 21+.
+greclipse = "4.36"
+
 jacoco = "0.8.14"
 
 junit-jupiter = "6.1.2"
