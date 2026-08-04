@@ -1,0 +1,3 @@
+BUG: a multi-line comment that is never closed makes the entry reader throw an IOException, which
+the program does not catch, so it prints a stack trace and exits with status 1.  It should print an
+error message the way it does for other malformed input.

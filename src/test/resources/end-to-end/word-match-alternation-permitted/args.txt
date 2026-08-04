@@ -1,0 +1,4 @@
+--entry-file=input/root
+--regular-expressions
+--word-match
+#foo|bar

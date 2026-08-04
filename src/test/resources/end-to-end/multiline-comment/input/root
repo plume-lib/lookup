@@ -1,0 +1,6 @@
+entry one <!-- which mentions bar --> and continues
+
+entry two
+<!-- a comment that mentions bar
+and spans two lines -->
+entry two, last line

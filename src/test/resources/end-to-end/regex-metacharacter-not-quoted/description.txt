@@ -1,0 +1,2 @@
+Without --regular-expressions, a search term is literal text, so "b.r" matches nothing even though
+the entry file contains "bar".

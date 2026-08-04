@@ -1,0 +1,4 @@
+--entry-file=input/fenced
+--code-fences
+--print-all
+entry

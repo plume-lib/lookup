@@ -1,0 +1,9 @@
+2 matches found (separated by dashes below)
+
+-------------------------
+input/root:1:
+one: the word bar appears here
+
+-------------------------
+input/root:3:
+two: embargo and rebarbative contain it

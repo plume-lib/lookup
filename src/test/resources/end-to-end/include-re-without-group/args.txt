@@ -1,0 +1,3 @@
+--entry-file=input/root
+--include-re=\\include
+entry

@@ -1,0 +1,3 @@
+--entry-file=input/fenced
+--print-all
+entry

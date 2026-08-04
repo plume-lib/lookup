@@ -1,0 +1,5 @@
+entry one, in the including file
+
+\include{included}
+
+entry three, in the including file

@@ -1,0 +1,3 @@
+--entry-file=input/entries
+--search-body
+xyzzy

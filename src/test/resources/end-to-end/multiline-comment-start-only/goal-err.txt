@@ -1,0 +1,1 @@
+Error: supply both or neither of --multiline-comment-start-re and --multiline-comment-end-re, not just one.

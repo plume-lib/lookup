@@ -1,0 +1,3 @@
+--word-match applies word boundaries to a whole regular expression, not just to its first and last
+alternatives.  "prequx" ends with "qux", so it would match the incorrectly grouped "\bbar|qux\b" but
+not the correct "\b(?:bar|qux)\b".

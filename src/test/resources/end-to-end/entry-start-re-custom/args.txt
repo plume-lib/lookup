@@ -1,0 +1,5 @@
+--entry-file=input/entries
+--entry-start-re=^BEGIN *()
+--entry-stop-re=^END
+--print-all
+entry

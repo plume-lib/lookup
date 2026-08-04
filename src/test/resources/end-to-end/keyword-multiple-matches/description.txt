@@ -1,0 +1,2 @@
+When multiple entries match, the program prints a count and a one-line synopsis of each match,
+along with the --item-num argument that would print it.

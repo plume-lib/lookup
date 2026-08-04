@@ -1,0 +1,9 @@
+2 matches found (separated by dashes below)
+
+-------------------------
+input/root:1:
+entry one, in the including file
+
+-------------------------
+${workdir}/input/sub/included:1:
+entry two, in the included file

@@ -1,0 +1,1 @@
+By default the program searches only a long entry's description, not its body.

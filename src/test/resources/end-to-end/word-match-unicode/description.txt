@@ -1,0 +1,2 @@
+--word-match uses UNICODE_CHARACTER_CLASS, so a non-ASCII letter counts as a word character:
+"café" is a whole word, and its "é" does not end the word before it.

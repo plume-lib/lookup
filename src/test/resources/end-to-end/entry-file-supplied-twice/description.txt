@@ -1,0 +1,2 @@
+The help text for --entry-file says that it "may only be supplied once", but supplying it twice is
+not diagnosed: the last occurrence wins.

@@ -1,0 +1,31 @@
+unknown option name '--no-such-option' in arg '--no-such-option'
+Usage: lookup [options] <keyword> ...
+
+Where to search:
+  -f --entry-file=<string>              - The colon-separated search list of files of information; may only be supplied once [default ~/lookup/root]
+  -b --search-body=<boolean>            - Search body of long entries for matches [default false]
+
+What to search for:
+  -e --regular-expressions=<boolean>    - Keywords are regular expressions [default false]
+  -c --case-sensitive=<boolean>         - Keywords are case sensitive [default false]
+  -w --word-match=<boolean>             - Only match search terms against complete words [default false]
+
+How to print matches:
+  -a --print-all=<boolean>              - Print the entire entry for each match [default false]
+  -i --item-num=<integer>               - Choose a specific item when there are multiple matches; index is 1-based
+  -l --show-location=<boolean>          - Show the location of each matching entry [default false]
+
+Customizing format of files to be searched:
+  --two-blank-lines=<boolean>           - If true, entries are separated by two blank lines [default false]
+  --code-fences=<boolean>               - If true, blank lines within ```...``` do not end an entry [default false]
+  --entry-start-re=<regex>              - Regex that denotes the start of a long entry [default ^>entry *()]
+  --entry-stop-re=<regex>               - Regex that denotes the end of a long entry [default ^<entry]
+  --description-re=<regex>              - Regex that finds an entry's description (for long entries)
+  --comment-re=<string>                 - Regex that matches a single-line comment
+  --multiline-comment-start-re=<string> - Regex that matches the start of a delimited comment
+  --multiline-comment-end-re=<string>   - Regex that matches the end of a delimited comment
+  --include-re=<string>                 - Regex that matches an include directive; group 1 is the file name [default \\include\{(.*)\}]
+
+Getting help:
+  -h --help=<boolean>                   - Show detailed help information [default false]
+  -v --verbose=<boolean>                - Print progress information [default false]

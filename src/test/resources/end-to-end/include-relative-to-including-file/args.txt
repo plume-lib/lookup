@@ -1,0 +1,4 @@
+--entry-file=input/root
+--show-location
+--print-all
+entry

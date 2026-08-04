@@ -1,0 +1,1 @@
+Case-insensitive keyword matching folds non-ASCII letters: "CAFÉ" matches "café".

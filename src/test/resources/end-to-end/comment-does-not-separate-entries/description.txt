@@ -1,0 +1,1 @@
+A comment line does not separate entries the way a blank line does: the entry continues across it.

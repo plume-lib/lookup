@@ -1,0 +1,2 @@
+An empty --comment-re turns comment processing off, rather than being used as a regular expression
+that matches everywhere.

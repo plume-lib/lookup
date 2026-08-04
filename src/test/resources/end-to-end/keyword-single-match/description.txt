@@ -1,0 +1,2 @@
+When exactly one entry matches, the program prints that entry and nothing else: no count, no
+synopsis.

@@ -1,0 +1,2 @@
+A line of the form "\include{filename}" is replaced by the contents of the named file, whose
+entries are searched along with the including file's own.

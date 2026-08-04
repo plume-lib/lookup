@@ -1,0 +1,2 @@
+--item-num takes precedence over --print-all: it prints the one selected match, without the count
+and the dashes that --print-all would print.

@@ -1,0 +1,2 @@
+An input file may use CRLF line separators.  The program does not echo them: it prints each line of
+an entry terminated by the line separator of the platform it runs on.

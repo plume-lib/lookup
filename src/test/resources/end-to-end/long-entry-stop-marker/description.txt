@@ -1,0 +1,2 @@
+A long entry ends at "<entry".  The stop marker is not part of the entry, and it does not separate
+entries the way a blank line does, so the text that follows it on subsequent lines is a new entry.

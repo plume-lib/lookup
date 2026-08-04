@@ -1,0 +1,2 @@
+By default a blank line ends an entry even within a ```...``` code fence, so the input file below
+holds three entries.  Compare test case code-fences, which searches the same input file.

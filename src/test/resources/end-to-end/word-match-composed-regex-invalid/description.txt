@@ -1,0 +1,4 @@
+Wrapping a search term in word boundaries can turn a valid regular expression into an invalid one:
+in "\b(?:\Qfoo)\b", the "\Q" quotes the rest of the regular expression, so the group is never
+closed.  The program blames --word-match, and does not claim that the search term is not a regular
+expression.

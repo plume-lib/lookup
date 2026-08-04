@@ -1,0 +1,1 @@
+An included file may itself contain an include directive.

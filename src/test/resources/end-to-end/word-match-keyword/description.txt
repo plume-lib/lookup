@@ -1,0 +1,2 @@
+--word-match makes a keyword match only a whole word.  "bar" is a whole word only in entry one; in
+entry two it appears within "embargo" and "rebarbative".

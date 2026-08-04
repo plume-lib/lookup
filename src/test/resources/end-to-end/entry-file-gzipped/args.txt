@@ -1,0 +1,3 @@
+--entry-file=input/root.gz
+--print-all
+entry

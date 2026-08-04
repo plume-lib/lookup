@@ -1,0 +1,6 @@
+-f
+input/root
+-w
+-a
+-l
+bar

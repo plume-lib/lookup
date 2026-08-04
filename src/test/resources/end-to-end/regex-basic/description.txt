@@ -1,0 +1,2 @@
+--regular-expressions treats each search term as a regular expression rather than as literal
+text.
