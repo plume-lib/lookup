@@ -1,0 +1,2 @@
+An include directive is recognized only when it matches the whole line, so a line that merely
+contains one is ordinary text.

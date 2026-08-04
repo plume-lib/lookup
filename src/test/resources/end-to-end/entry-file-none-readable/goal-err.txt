@@ -1,0 +1,3 @@
+Error: Can't read any entry files.
+  entry file input/no-such-file
+  entry file input/nor-this-one

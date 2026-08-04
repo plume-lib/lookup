@@ -1,0 +1,2 @@
+--comment-re gives a regular expression that matches a single-line comment.  A line that is
+entirely a comment is ignored, so a match within it is not reported.

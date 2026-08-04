@@ -1,0 +1,1 @@
+When --description-re matches nothing in an entry, the entry's description is its first line.

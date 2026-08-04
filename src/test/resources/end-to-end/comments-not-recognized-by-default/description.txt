@@ -1,0 +1,4 @@
+BUG: the class documentation of Lookup says "Comments start with a % sign in the first column by
+default", but --comment-re has no default value, so no line is a comment unless --comment-re is
+supplied.  The goal files record what the program does: the comment line below is part of the entry
+and is searched.  Either the documentation or the default value of --comment-re should change.

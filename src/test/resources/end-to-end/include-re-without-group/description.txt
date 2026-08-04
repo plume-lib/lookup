@@ -1,0 +1,2 @@
+--include-re must have a group, which is the file name; a regular expression without one is
+diagnosed.

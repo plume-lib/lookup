@@ -1,0 +1,2 @@
+An include directive ends the entry that contains it, because an entry does not span a change of
+file.  The three lines below would be one entry if the middle one were ordinary text.

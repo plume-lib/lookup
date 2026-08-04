@@ -1,0 +1,2 @@
+A long entry is terminated by the start of the next long entry, even without a "<entry" marker and
+even without a blank line.

@@ -1,0 +1,2 @@
+The last entry of a file need not end with a line separator.  The program prints the entry with
+one, because the entry reader terminates every line of an entry's body.

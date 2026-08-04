@@ -1,0 +1,3 @@
+BUG: when the entry file is a directory, reading it throws an IOException, which the program does
+not catch, so it prints a stack trace and exits with status 1.  It should print an error message.
+(The directory below contains a file because git does not track an empty directory.)

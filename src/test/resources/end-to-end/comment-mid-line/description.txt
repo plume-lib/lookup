@@ -1,0 +1,2 @@
+A comment need not start at the beginning of a line.  The text before the comment remains part of
+the entry; the comment itself is discarded.

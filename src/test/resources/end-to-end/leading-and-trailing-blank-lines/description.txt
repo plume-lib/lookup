@@ -1,0 +1,2 @@
+Blank lines before the first entry and after the last one are not part of any entry.  Trailing
+whitespace on an otherwise blank line does not make it a non-blank line.

@@ -1,0 +1,3 @@
+A search term that ends with a non-word character is diagnosed for the same reason as one that
+starts with one.  This search would have succeeded -- "\bre-\b" does match "re-entrant" -- but the
+check rejects every search term that ends with a literal non-word character.

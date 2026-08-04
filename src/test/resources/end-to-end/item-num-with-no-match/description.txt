@@ -1,0 +1,2 @@
+A positive --item-num cannot be checked against the number of matches until the search is done, so
+when nothing matches the program reports that rather than complaining about --item-num.

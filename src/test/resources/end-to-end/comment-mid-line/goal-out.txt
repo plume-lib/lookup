@@ -1,0 +1,8 @@
+2 matches found (separated by dashes below)
+
+-------------------------
+entry one, with a trailing comment 
+entry one, second line
+
+-------------------------
+entry two

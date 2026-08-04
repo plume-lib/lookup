@@ -1,0 +1,3 @@
+--description-re selects the text that a long entry's synopsis shows, and that the program
+searches when --search-body is not supplied.  Here the description is the "Name:" line rather than
+the first line.

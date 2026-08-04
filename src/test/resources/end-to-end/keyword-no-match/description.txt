@@ -1,0 +1,1 @@
+When no entry matches, the program says so and still exits with status 0.
