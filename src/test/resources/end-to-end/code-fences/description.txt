@@ -1,0 +1,3 @@
+--code-fences makes a blank line within a ```...``` code fence not end an entry, so the input file
+below holds two entries.  Compare test case code-fences-disabled, which searches the same input
+file.

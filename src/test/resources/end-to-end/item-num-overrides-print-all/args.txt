@@ -1,0 +1,4 @@
+--entry-file=input/root
+--item-num=1
+--print-all
+bar

@@ -1,0 +1,4 @@
+BUG: an unrecognized option is diagnosed by the command-line-option library, which prints the
+complaint and the usage message to standard output rather than to standard error.  A diagnostic
+belongs on standard error, so that a user who pipes the program's output does not silently get a
+usage message in place of search results.  The exit status, 255, is at least nonzero.

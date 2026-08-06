@@ -1,0 +1,2 @@
+input/root:1:
+entry one, which mentions bar

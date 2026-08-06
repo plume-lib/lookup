@@ -1,0 +1,3 @@
+--word-match may be supplied together with --regular-expressions, in which case it restricts the
+regular expression to whole words.  It does not quote the regular expression: "." is still a
+wildcard.

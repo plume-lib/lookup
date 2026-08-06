@@ -1,0 +1,21 @@
+Options settings: 
+entry-file                            = input/root
+search-body                           = false
+regular-expressions                   = false
+case-sensitive                        = false
+word-match                            = false
+print-all                             = false
+item-num                              = null
+show-location                         = false
+two-blank-lines                       = false
+code-fences                           = false
+entry-start-re                        = ^>entry *()
+entry-stop-re                         = ^<entry
+description-re                        = null
+comment-re                            = null
+multiline-comment-start-re            = null
+multiline-comment-end-re              = null
+include-re                            = \\include\{(.*)\}
+help                                  = false
+verbose                               = true
+the only entry, which mentions bar

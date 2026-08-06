@@ -1,0 +1,2 @@
+A keyword matches within a word, not just as a whole word.  "barb" appears only inside
+"rebarbative".

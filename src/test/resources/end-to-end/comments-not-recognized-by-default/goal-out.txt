@@ -1,0 +1,2 @@
+% a comment that mentions bar
+first entry, which does not mention it

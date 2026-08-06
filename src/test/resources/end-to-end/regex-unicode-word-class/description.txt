@@ -1,0 +1,2 @@
+\w matches a non-ASCII word character, because the program compiles every search regular
+expression with UNICODE_CHARACTER_CLASS.  Without that flag, "caf\w" would not match "café".

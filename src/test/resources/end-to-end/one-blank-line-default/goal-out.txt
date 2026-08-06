@@ -1,0 +1,10 @@
+3 matches found (separated by dashes below)
+
+-------------------------
+entry one, first paragraph
+
+-------------------------
+entry one, second paragraph
+
+-------------------------
+entry two

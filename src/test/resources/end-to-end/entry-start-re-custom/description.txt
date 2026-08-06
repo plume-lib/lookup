@@ -1,0 +1,2 @@
+--entry-start-re and --entry-stop-re customize how a long entry is delimited.  Group 1 of
+--entry-start-re is retained in the output; the rest of the match is removed.

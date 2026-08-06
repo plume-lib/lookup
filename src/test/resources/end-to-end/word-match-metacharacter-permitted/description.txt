@@ -1,0 +1,4 @@
+For a regular expression, the check for a non-word character at the start or end of a search term
+is a heuristic that never rejects a search term that might match a word character; rejecting one
+would be fatal.  "[#]bar" starts with a metacharacter, so the search is permitted -- and then finds
+nothing, which is the accepted cost of never rejecting a search that might have worked.

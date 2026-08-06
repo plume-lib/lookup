@@ -1,0 +1,1 @@
+An invalid regular expression is diagnosed rather than throwing an exception.

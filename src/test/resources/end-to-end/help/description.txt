@@ -1,0 +1,2 @@
+--help prints the usage message and exits, without searching.  The usage message goes to standard
+output, and no entry file is needed.

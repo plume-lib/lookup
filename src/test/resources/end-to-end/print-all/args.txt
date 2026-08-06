@@ -1,0 +1,3 @@
+--entry-file=input/root
+--print-all
+bar

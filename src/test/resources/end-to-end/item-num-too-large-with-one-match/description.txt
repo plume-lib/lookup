@@ -1,0 +1,2 @@
+An --item-num greater than the number of matches is diagnosed even when there is exactly one match,
+rather than printing that match.

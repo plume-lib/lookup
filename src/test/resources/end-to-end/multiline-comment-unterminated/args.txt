@@ -1,0 +1,4 @@
+--entry-file=input/root
+--multiline-comment-start-re=<!--
+--multiline-comment-end-re=-->
+bar

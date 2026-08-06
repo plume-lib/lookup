@@ -1,0 +1,10 @@
+3 matches found (separated by dashes below)
+
+-------------------------
+entry one, in the including file
+
+-------------------------
+entry two, in the middle file
+
+-------------------------
+entry three, in the innermost file

@@ -1,0 +1,1 @@
+--verbose prints the value of every option before searching.

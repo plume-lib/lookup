@@ -1,0 +1,2 @@
+The check for a non-word character at the start of a search term also applies when the search term
+is a regular expression.

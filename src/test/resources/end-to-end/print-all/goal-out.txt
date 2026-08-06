@@ -1,0 +1,7 @@
+2 matches found (separated by dashes below)
+
+-------------------------
+one: the word bar appears here
+
+-------------------------
+two: embargo and rebarbative contain it

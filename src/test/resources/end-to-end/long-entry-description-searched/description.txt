@@ -1,0 +1,2 @@
+A long entry is introduced by ">entry"; the rest of that line is its description.  The program
+searches the description and prints the whole entry, with the ">entry " marker removed.

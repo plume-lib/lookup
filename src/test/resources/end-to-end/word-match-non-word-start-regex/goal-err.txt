@@ -1,0 +1,2 @@
+Error: cannot apply --word-match to #define: it starts with non-word character '#'
+  A word boundary adjacent to a non-word character requires a word character on its other side, so the search would match almost nothing.

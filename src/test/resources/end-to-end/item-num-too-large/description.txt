@@ -1,0 +1,1 @@
+An --item-num greater than the number of matches is diagnosed.

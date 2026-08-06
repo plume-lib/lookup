@@ -1,0 +1,2 @@
+--show-location prints the file name and line number of the match, on a line of its own before the
+entry.

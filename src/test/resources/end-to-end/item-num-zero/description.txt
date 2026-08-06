@@ -1,0 +1,2 @@
+A non-positive --item-num is diagnosed.  It is checked before the entry file is read, so the check
+does not depend on how many entries match.

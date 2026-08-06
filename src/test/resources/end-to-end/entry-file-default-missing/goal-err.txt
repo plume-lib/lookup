@@ -1,0 +1,2 @@
+Error: Can't read any entry files.
+  entry file ${workdir}/home/lookup/root

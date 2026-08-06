@@ -1,0 +1,1 @@
+Supplying only one of --multiline-comment-start-re and --multiline-comment-end-re is diagnosed.

@@ -1,0 +1,2 @@
+Multiple keywords are conjoined: an entry matches only if it contains all of them.  Entry two
+contains "bar" (within "embargo") but not "here", so only entry one matches.

@@ -1,0 +1,12 @@
+3 matches found (separated by dashes below)
+
+-------------------------
+alpha, a long entry
+its body mentions xyzzy
+
+-------------------------
+text after the stop marker
+
+-------------------------
+beta, another long entry
+its body mentions plugh

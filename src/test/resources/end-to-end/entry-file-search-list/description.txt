@@ -1,0 +1,2 @@
+--entry-file takes a colon-separated search list, and the program uses the first file of the list
+that it can read.

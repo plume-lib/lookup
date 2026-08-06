@@ -1,0 +1,7 @@
+BEGIN alpha, a long entry
+alpha body
+END
+
+BEGIN beta, another long entry
+beta body
+END
