@@ -328,6 +328,7 @@ final class LookupTest {
     String keyword = new String(Character.toChars(0x1D44E)) + "lpha";
     LookupResult result = runLookup("--word-match", keyword);
     assertEquals(0, result.exitStatus(), result.stderr());
+    assertEquals("", result.stderr(), "unexpected diagnostic");
     assertEquals(entrySeven + lineSep, result.stdout());
   }
 
