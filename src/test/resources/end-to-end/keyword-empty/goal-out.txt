@@ -1,0 +1,7 @@
+6 matches found. Use -i to print a specific match or -a to see them all.
+  -i=1 one: the word bar appears here
+  -i=2 two: embargo and rebarbative contain it
+  -i=3 three: prequx appears here
+  -i=4 four: #define DIRECTIVE
+  -i=5 five: café society
+  -i=6 six: a re-entrant lock

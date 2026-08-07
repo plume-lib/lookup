@@ -1,0 +1,8 @@
+An include directive's file name is relative to the directory of the file that contains the
+directive, not to the working directory.  The program is run in the parent of "input", yet
+"\include{sub/included}" in "input/root" finds "input/sub/included".
+
+The location that --show-location prints for an entry of an included file is an absolute path, while
+the location it prints for an entry of the top-level file is the file name as supplied on the
+command line.  That inconsistency comes from the entry reader, which makes an included file's name
+absolute in order to resolve it.

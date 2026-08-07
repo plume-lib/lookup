@@ -1,0 +1,3 @@
+--multiline-comment-start-re and --multiline-comment-end-re delimit a comment that may span lines.
+Such a comment is discarded even in the middle of an entry, and the lines around it become adjacent
+lines of the entry.

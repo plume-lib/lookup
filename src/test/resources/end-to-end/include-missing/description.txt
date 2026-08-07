@@ -1,0 +1,5 @@
+BUG: when an include directive names a file that does not exist, opening it throws a
+NoSuchFileException, which the program does not catch, so it prints a stack trace and exits with
+status 1.  The program does try to report this: it catches FileNotFoundException around the search
+loop and prints "Error: Can't read ...".  But Files.newInputStream, which the entry reader uses,
+throws NoSuchFileException, which is not a FileNotFoundException, so that handler is dead code.

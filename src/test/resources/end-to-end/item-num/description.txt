@@ -1,0 +1,1 @@
+--item-num prints one specific match.  The index is 1-based.

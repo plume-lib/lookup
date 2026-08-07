@@ -1,0 +1,1 @@
+--search-body searches the body of a long entry in addition to its description.

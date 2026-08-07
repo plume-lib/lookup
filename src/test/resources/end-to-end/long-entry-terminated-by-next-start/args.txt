@@ -1,0 +1,4 @@
+--entry-file=input/entries
+--search-body
+--print-all
+body

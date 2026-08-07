@@ -1,0 +1,13 @@
+2 matches found (separated by dashes below)
+
+-------------------------
+entry one, which contains code:
+```
+first line of code
+
+second line of code
+```
+last line of entry one
+
+-------------------------
+entry two

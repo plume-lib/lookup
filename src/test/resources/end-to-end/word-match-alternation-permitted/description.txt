@@ -1,0 +1,2 @@
+The heuristic draws no conclusion from an alternation, in which a non-word character at either end
+of the regular expression need not be at that end of every match.

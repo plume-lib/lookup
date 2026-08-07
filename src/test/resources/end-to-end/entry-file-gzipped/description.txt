@@ -1,0 +1,1 @@
+A compressed entry file, recognized by its ".gz" extension, is uncompressed as it is read.

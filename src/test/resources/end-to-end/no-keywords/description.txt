@@ -1,0 +1,3 @@
+When no keyword is supplied, the program says so and prints the usage message.  The error message
+goes to standard error, but the usage message goes to standard output; see test case
+unknown-option, which reports that as a bug.

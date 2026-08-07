@@ -1,0 +1,1 @@
+With --show-location, each synopsis line contains the location of the match.

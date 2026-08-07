@@ -1,0 +1,1 @@
+second: an entry that starts with the word

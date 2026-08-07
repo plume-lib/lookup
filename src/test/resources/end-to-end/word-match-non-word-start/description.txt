@@ -1,0 +1,3 @@
+A search term that starts with a non-word character would match almost nothing under --word-match,
+because a word boundary adjacent to a non-word character requires a word character on its other
+side.  The program diagnoses that rather than performing the search.

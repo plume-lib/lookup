@@ -1,0 +1,1 @@
+Error: --comment-re is not a regex: (

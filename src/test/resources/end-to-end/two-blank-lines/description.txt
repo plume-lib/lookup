@@ -1,0 +1,3 @@
+--two-blank-lines makes two blank lines, rather than one, separate entries, so the input file below
+holds two entries and a single blank line is part of an entry's body.  Compare test case
+one-blank-line-default, which searches the same input file.

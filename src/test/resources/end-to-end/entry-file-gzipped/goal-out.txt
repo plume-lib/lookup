@@ -1,0 +1,7 @@
+2 matches found (separated by dashes below)
+
+-------------------------
+entry one, which mentions bar
+
+-------------------------
+entry two

@@ -1,0 +1,2 @@
+Error: cannot apply --word-match to \Qfoo: Unclosed group near index 13
+\b(?:\Qfoo)\b

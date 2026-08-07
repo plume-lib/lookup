@@ -1,0 +1,3 @@
+A search regular expression is matched against a whole entry, which may be several lines, and the
+program does not use MULTILINE mode.  So "^" matches only at the beginning of the entry, not at the
+beginning of each of its lines.

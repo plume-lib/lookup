@@ -1,0 +1,2 @@
+When no file of the --entry-file search list can be read, the program says so and lists the files
+it tried.

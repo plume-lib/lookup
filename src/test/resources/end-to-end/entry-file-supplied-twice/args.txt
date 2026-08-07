@@ -1,0 +1,3 @@
+--entry-file=input/first
+--entry-file=input/second
+bar

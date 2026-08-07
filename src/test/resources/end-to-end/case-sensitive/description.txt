@@ -1,0 +1,1 @@
+--case-sensitive makes keyword matching case-sensitive, so "BAR" no longer matches "bar".

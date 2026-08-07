@@ -1,0 +1,2 @@
+Every option has a long name, and most have a one-character short name.  This test case supplies
+the short names of --entry-file, --word-match, --print-all, and --show-location.

@@ -1,0 +1,2 @@
+A value that is not a boolean, for an option that takes one, is diagnosed by the
+command-line-option library.

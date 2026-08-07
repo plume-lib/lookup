@@ -1,0 +1,2 @@
+--print-all prints the body of every matching entry, separated by dashes, rather than a synopsis of
+each.
