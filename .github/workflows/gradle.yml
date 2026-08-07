@@ -23,9 +23,14 @@ jobs:
           java-version: ${{ matrix.java }}
           check-latest: true
           cache: 'gradle'
+      - name: Cache Spotless p2 data
+        uses: actions/cache@v6
+        with:
+          # This is the directory that build.gradle passes to `cacheDirectory`.
+          path: ~/.gradle/spotless-p2
+          key: spotless-p2-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: spotless-p2-${{ runner.os }}-
       - name: java -version
         run: java -version
-      - name: Warm up Gradle cache
-        run: ./gradlew spotlessCheck > /dev/null 2>&1 || (sleep 60 && true)
       - name: ./gradlew build
         run: ./gradlew build
