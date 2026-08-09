@@ -34,7 +34,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  * {@code src/test/resources/end-to-end/README.txt} for the layout of a test case. Every
  * subdirectory is a test case, so a new test case can be added without changing this file.
  */
-public final class LookupEndToEndTest {
+final class LookupEndToEndTest {
 
   /** Creates a new LookupEndToEndTest. */
   public LookupEndToEndTest() {}
@@ -117,7 +117,7 @@ public final class LookupEndToEndTest {
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("testCaseNames")
-  public void endToEnd(String caseName, @TempDir Path workingDir, @TempDir Path captureDir)
+  void endToEnd(String caseName, @TempDir Path workingDir, @TempDir Path captureDir)
       throws Exception {
     Path caseDir = testDataDir.resolve(caseName);
     checkCaseDir(caseDir);
