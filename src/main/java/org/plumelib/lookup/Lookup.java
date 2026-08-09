@@ -56,74 +56,218 @@ import org.plumelib.util.RegexUtil;
  *
  * <ul>
  *   <li id="optiongroup:Where-to-search">Where to search
- *       <ul>
- *         <li id="option:entry-file"><b>-f</b> <b>--entry-file=</b><i>string</i>. Specify the
- *             colon-separated search list for the file that contains information to be searched.
- *             Only the first file found is used, though it may itself contain include directives.
- *             [default: ~/lookup/root]
- *         <li id="option:search-body"><b>-b</b> <b>--search-body=</b><i>boolean</i>. Search the
- *             body of long entries in addition to the entry's description. The bodies of short
- *             entries are always searched. [default: false]
- *       </ul>
+ *                                        <ul>
+ *                                          <li id="option:entry-file"><b>-f</b>
+ *                                                                     <b>--entry-file=</b><i>string</i>.
+ *                                                                     Specify the colon-separated
+ *                                                                     search list for the file that
+ *                                                                     contains information to be
+ *                                                                     searched. Only the first file
+ *                                                                     found is used, though it may
+ *                                                                     itself contain include
+ *                                                                     directives. [default:
+ *                                                                     ~/lookup/root]
+ *                                          <li id="option:search-body"><b>-b</b>
+ *                                                                      <b>--search-body=</b><i>boolean</i>.
+ *                                                                      Search the body of long
+ *                                                                      entries in addition to the
+ *                                                                      entry's description. The
+ *                                                                      bodies of short entries are
+ *                                                                      always searched. [default:
+ *                                                                      false]
+ *                                        </ul>
  *   <li id="optiongroup:What-to-search-for">What to search for
- *       <ul>
- *         <li id="option:regular-expressions"><b>-e</b>
- *             <b>--regular-expressions=</b><i>boolean</i>. Specifies that keywords are regular
- *             expressions. If false, keywords are text matches. [default: false]
- *         <li id="option:case-sensitive"><b>-c</b> <b>--case-sensitive=</b><i>boolean</i>. If true,
- *             keyword matching is case sensitive. By default, both regular expressions and text
- *             keywords are case-insensitive. [default: false]
- *         <li id="option:word-match"><b>-w</b> <b>--word-match=</b><i>boolean</i>. If true, match a
- *             keyword or regular expression only as a separate word, not as a substring of a word.
- *             This option may be supplied together with {@code --regular-expressions}.
- *             <p>A search term whose first or last character is not a word character matches almost
- *             nothing, because a word boundary that is adjacent to a non-word character requires a
- *             word character on its other side. For example, {@code #define} would match
- *             "abc#define" but not "#define X". Lookup reports an error rather than performing such
- *             a search. [default: false]
- *       </ul>
+ *                                           <ul>
+ *                                             <li id="option:regular-expressions"><b>-e</b>
+ *                                                                                 <b>--regular-expressions=</b><i>boolean</i>.
+ *                                                                                 Specifies that
+ *                                                                                 keywords are
+ *                                                                                 regular
+ *                                                                                 expressions. If
+ *                                                                                 false, keywords
+ *                                                                                 are text matches.
+ *                                                                                 [default: false]
+ *                                             <li id="option:case-sensitive"><b>-c</b>
+ *                                                                            <b>--case-sensitive=</b><i>boolean</i>.
+ *                                                                            If true, keyword
+ *                                                                            matching is case
+ *                                                                            sensitive. By default,
+ *                                                                            both regular
+ *                                                                            expressions and text
+ *                                                                            keywords are
+ *                                                                            case-insensitive.
+ *                                                                            [default: false]
+ *                                             <li id="option:word-match"><b>-w</b>
+ *                                                                        <b>--word-match=</b><i>boolean</i>.
+ *                                                                        If true, match a keyword
+ *                                                                        or regular expression only
+ *                                                                        as a separate word, not as
+ *                                                                        a substring of a word.
+ *                                                                        This option may be
+ *                                                                        supplied together with
+ *                                                                        {@code
+ *                                                                        --regular-expressions}.
+ *                                                                        <p>A search term whose
+ *                                                                        first or last character is
+ *                                                                        not a word character
+ *                                                                        matches almost nothing,
+ *                                                                        because a word boundary
+ *                                                                        that is adjacent to a
+ *                                                                        non-word character
+ *                                                                        requires a word character
+ *                                                                        on its other side. For
+ *                                                                        example, {@code #define}
+ *                                                                        would match "abc#define"
+ *                                                                        but not "#define X".
+ *                                                                        Lookup reports an error
+ *                                                                        rather than performing
+ *                                                                        such a search. [default:
+ *                                                                        false]
+ *                                           </ul>
  *   <li id="optiongroup:How-to-print-matches">How to print matches
- *       <ul>
- *         <li id="option:print-all"><b>-a</b> <b>--print-all=</b><i>boolean</i>. By default, if
- *             multiple entries are matched, only a synopsis of each entry is printed. If
- *             'print_all' is selected then the body of each matching entry is printed. [default:
- *             false]
- *         <li id="option:item-num"><b>-i</b> <b>--item-num=</b><i>integer</i>. Specifies which item
- *             to print when there are multiple matches. The index is 1-based; that is, it starts
- *             counting at 1.
- *         <li id="option:show-location"><b>-l</b> <b>--show-location=</b><i>boolean</i>. If true,
- *             show the filename/line number of each matching entry in the output. [default: false]
- *       </ul>
+ *                                             <ul>
+ *                                               <li id="option:print-all"><b>-a</b>
+ *                                                                         <b>--print-all=</b><i>boolean</i>.
+ *                                                                         By default, if multiple
+ *                                                                         entries are matched, only
+ *                                                                         a synopsis of each entry
+ *                                                                         is printed. If
+ *                                                                         'print_all' is selected
+ *                                                                         then the body of each
+ *                                                                         matching entry is
+ *                                                                         printed. [default: false]
+ *                                               <li id="option:item-num"><b>-i</b>
+ *                                                                        <b>--item-num=</b><i>integer</i>.
+ *                                                                        Specifies which item to
+ *                                                                        print when there are
+ *                                                                        multiple matches. The
+ *                                                                        index is 1-based; that is,
+ *                                                                        it starts counting at 1.
+ *                                               <li id="option:show-location"><b>-l</b>
+ *                                                                             <b>--show-location=</b><i>boolean</i>.
+ *                                                                             If true, show the
+ *                                                                             filename/line number
+ *                                                                             of each matching
+ *                                                                             entry in the output.
+ *                                                                             [default: false]
+ *                                             </ul>
  *   <li id="optiongroup:Customizing-format-of-files-to-be-searched">Customizing format of files to
- *       be searched
- *       <ul>
- *         <li id="option:two-blank-lines"><b>--two-blank-lines=</b><i>boolean</i>. If true, entries
- *             are separated by two blank lines. [default: false]
- *         <li id="option:code-fences"><b>--code-fences=</b><i>boolean</i>. If true, code fences are
- *             supported: blank lines within ```...``` do not end an entry. [default: false]
- *         <li id="option:entry-start-re"><b>--entry-start-re=</b><i>regex</i>. Matches the start of
- *             a long entry. [default: ^&gt;entry *()]
- *         <li id="option:entry-stop-re"><b>--entry-stop-re=</b><i>regex</i>. Matches the end of a
- *             long entry. [default: ^&lt;entry]
- *         <li id="option:description-re"><b>--description-re=</b><i>regex</i>. Matches the
- *             description for a long entry.
- *         <li id="option:comment-re"><b>--comment-re=</b><i>string</i>. Matches an entire
- *             single-line comment (not just a comment start).
- *         <li
+ *                                                                   be searched
+ *                                                                   <ul>
+ *                                                                     <li id="option:two-blank-lines"><b>--two-blank-lines=</b><i>boolean</i>.
+ *                                                                                                     If
+ *                                                                                                     true,
+ *                                                                                                     entries
+ *                                                                                                     are
+ *                                                                                                     separated
+ *                                                                                                     by
+ *                                                                                                     two
+ *                                                                                                     blank
+ *                                                                                                     lines.
+ *                                                                                                     [default:
+ *                                                                                                     false]
+ *                                                                     <li id="option:code-fences"><b>--code-fences=</b><i>boolean</i>.
+ *                                                                                                 If
+ *                                                                                                 true,
+ *                                                                                                 code
+ *                                                                                                 fences
+ *                                                                                                 are
+ *                                                                                                 supported:
+ *                                                                                                 blank
+ *                                                                                                 lines
+ *                                                                                                 within
+ *                                                                                                 ```...```
+ *                                                                                                 do
+ *                                                                                                 not
+ *                                                                                                 end
+ *                                                                                                 an
+ *                                                                                                 entry.
+ *                                                                                                 [default:
+ *                                                                                                 false]
+ *                                                                     <li id="option:entry-start-re"><b>--entry-start-re=</b><i>regex</i>.
+ *                                                                                                    Matches
+ *                                                                                                    the
+ *                                                                                                    start
+ *                                                                                                    of
+ *                                                                                                    a
+ *                                                                                                    long
+ *                                                                                                    entry.
+ *                                                                                                    [default:
+ *                                                                                                    ^&gt;entry
+ *                                                                                                    *()]
+ *                                                                     <li id="option:entry-stop-re"><b>--entry-stop-re=</b><i>regex</i>.
+ *                                                                                                   Matches
+ *                                                                                                   the
+ *                                                                                                   end
+ *                                                                                                   of
+ *                                                                                                   a
+ *                                                                                                   long
+ *                                                                                                   entry.
+ *                                                                                                   [default:
+ *                                                                                                   ^&lt;entry]
+ *                                                                     <li id="option:description-re"><b>--description-re=</b><i>regex</i>.
+ *                                                                                                    Matches
+ *                                                                                                    the
+ *                                                                                                    description
+ *                                                                                                    for
+ *                                                                                                    a
+ *                                                                                                    long
+ *                                                                                                    entry.
+ *                                                                     <li id="option:comment-re"><b>--comment-re=</b><i>string</i>.
+ *                                                                                                Matches
+ *                                                                                                an
+ *                                                                                                entire
+ *                                                                                                single-line
+ *                                                                                                comment
+ *                                                                                                (not
+ *                                                                                                just
+ *                                                                                                a
+ *                                                                                                comment
+ *                                                                                                start).
+ *                                                                     <li
  *             id="option:multiline-comment-start-re"><b>--multiline-comment-start-re=</b><i>string</i>.
- *             Matches the start of a possibly multi-line comment.
- *         <li id="option:multiline-comment-end-re"><b>--multiline-comment-end-re=</b><i>string</i>.
- *             Matches the end of a possibly multi-line comment.
- *         <li id="option:include-re"><b>--include-re=</b><i>string</i>. Matches an include
- *             directive; group 1 is the file name. [default: \\include\{(.*)\}]
- *       </ul>
+ *                                                                                                                               Matches
+ *                                                                                                                               the
+ *                                                                                                                               start
+ *                                                                                                                               of
+ *                                                                                                                               a
+ *                                                                                                                               possibly
+ *                                                                                                                               multi-line
+ *                                                                                                                               comment.
+ *                                                                     <li id="option:multiline-comment-end-re"><b>--multiline-comment-end-re=</b><i>string</i>.
+ *                                                                                                              Matches
+ *                                                                                                              the
+ *                                                                                                              end
+ *                                                                                                              of
+ *                                                                                                              a
+ *                                                                                                              possibly
+ *                                                                                                              multi-line
+ *                                                                                                              comment.
+ *                                                                     <li id="option:include-re"><b>--include-re=</b><i>string</i>.
+ *                                                                                                Matches
+ *                                                                                                an
+ *                                                                                                include
+ *                                                                                                directive;
+ *                                                                                                group
+ *                                                                                                1
+ *                                                                                                is
+ *                                                                                                the
+ *                                                                                                file
+ *                                                                                                name.
+ *                                                                                                [default:
+ *                                                                                                \\include\{(.*)\}]
+ *                                                                   </ul>
  *   <li id="optiongroup:Getting-help">Getting help
- *       <ul>
- *         <li id="option:help"><b>-h</b> <b>--help=</b><i>boolean</i>. Show detailed help
- *             information and exit. [default: false]
- *         <li id="option:verbose"><b>-v</b> <b>--verbose=</b><i>boolean</i>. Print progress
- *             information. [default: false]
- *       </ul>
+ *                                     <ul>
+ *                                       <li id="option:help"><b>-h</b>
+ *                                                            <b>--help=</b><i>boolean</i>. Show
+ *                                                            detailed help information and exit.
+ *                                                            [default: false]
+ *                                       <li id="option:verbose"><b>-v</b>
+ *                                                               <b>--verbose=</b><i>boolean</i>.
+ *                                                               Print progress information.
+ *                                                               [default: false]
+ *                                     </ul>
  * </ul>
  *
  * <!-- end options doc -->
