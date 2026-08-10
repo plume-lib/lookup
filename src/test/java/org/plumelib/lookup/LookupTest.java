@@ -63,6 +63,15 @@ final class LookupTest {
   /** The sixth entry of {@link #entryFile}. It contains a hyphenated word. */
   private static final String entrySix = "six: a re-entrant lock";
 
+  /**
+   * The seventh entry of {@link #entryFile}. Its word starts with U+1D44E (MATHEMATICAL ITALIC
+   * SMALL A), a word character outside the Basic Multilingual Plane. The character is built from
+   * its code point, rather than written literally, so that this file's encoding cannot affect the
+   * test.
+   */
+  private static final String entrySeven =
+      "seven: " + new String(Character.toChars(0x1D44E)) + "lpha begins with a non-BMP letter";
+
   /** Write the entry file that the tests search. */
   @BeforeEach
   void writeEntryFile() throws IOException {
@@ -82,6 +91,8 @@ final class LookupTest {
             entryFive,
             "",
             entrySix,
+            "",
+            entrySeven,
             ""));
   }
 
@@ -303,6 +314,22 @@ final class LookupTest {
     LookupResult withWordMatch = runLookup("--regular-expressions", "--word-match", "caf\\w");
     assertEquals(0, withWordMatch.exitStatus(), withWordMatch.stderr());
     assertEquals(entryFive + lineSep, withWordMatch.stdout());
+  }
+
+  /**
+   * Test that {@code --word-match} does not misdiagnose a search term that starts with a
+   * supplementary-plane (non-BMP) word character. Before Lookup's word-matchability check was
+   * changed to operate on code points, {@code charAt} split such a character into a lone surrogate,
+   * which {@code \w} never matches; that caused a false "non-word character" error and a spurious
+   * exit rather than a successful search.
+   */
+  @Test
+  void testWordMatchSupplementaryPlaneCharacter() throws IOException, InterruptedException {
+    String keyword = new String(Character.toChars(0x1D44E)) + "lpha";
+    LookupResult result = runLookup("--word-match", keyword);
+    assertEquals(0, result.exitStatus(), result.stderr());
+    assertEquals("", result.stderr(), "unexpected diagnostic");
+    assertEquals(entrySeven + lineSep, result.stdout());
   }
 
   /** Test that an entry matches only if it contains every keyword. */
