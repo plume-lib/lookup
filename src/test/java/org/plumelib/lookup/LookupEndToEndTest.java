@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.io.TempDir;
@@ -36,9 +35,6 @@ import org.junit.jupiter.params.provider.MethodSource;
  */
 final class LookupEndToEndTest {
 
-  /** Creates a new LookupEndToEndTest. */
-  public LookupEndToEndTest() {}
-
   /** The classpath resource that contains one subdirectory per test case. */
   private static final String testDataResource = "/end-to-end";
 
@@ -46,26 +42,19 @@ final class LookupEndToEndTest {
   private static final Path testDataDir = findTestDataDir();
 
   /** The file names that may appear in a test case directory. */
-  private static final Set<String> permittedCaseFiles =
+  private static final Set<String> permittedTestFiles =
       Set.of(
-          "description.txt",
-          "input",
-          "home",
           "args.txt",
+          "description.txt",
           "goal-out.txt",
           "goal-err.txt",
           "goal-err-prefix.txt",
-          "goal-status.txt");
+          "goal-status.txt",
+          "home",
+          "input");
 
-  /**
-   * What the test harness substitutes for the working directory's absolute path, wherever that path
-   * appears in the program's output. Without the substitution, no goal file could record output
-   * that contains an absolute path, because the working directory is a fresh temporary directory.
-   */
-  private static final String workingDirPlaceholder = "${workdir}";
-
-  /** How long to wait for the program to terminate, in seconds. */
-  private static final int timeoutSeconds = 120;
+  /** Creates a new LookupEndToEndTest. */
+  /*package*/ LookupEndToEndTest() {}
 
   /**
    * Returns the directory that contains the test cases.
@@ -167,14 +156,14 @@ final class LookupEndToEndTest {
     try (Stream<Path> children = Files.list(caseDir)) {
       for (Path child : children.toList()) {
         String name = child.toFile().getName();
-        if (!permittedCaseFiles.contains(name)) {
+        if (!permittedTestFiles.contains(name)) {
           fail(
               "Test case "
                   + caseDir.toFile().getName()
-                  + " contains unrecognized file "
+                  + " contains file "
                   + name
                   + ".  Permitted files are "
-                  + new TreeSet<>(permittedCaseFiles)
+                  + permittedTestFiles
                   + ".");
         }
       }
@@ -229,6 +218,7 @@ final class LookupEndToEndTest {
             .redirectOutput(stdoutFile.toFile())
             .redirectError(stderrFile.toFile())
             .start();
+    int timeoutSeconds = 120;
     if (!process.waitFor(timeoutSeconds, TimeUnit.SECONDS)) {
       process.destroyForcibly();
       throw new Error("The program did not terminate within " + timeoutSeconds + " seconds.");
@@ -346,8 +336,7 @@ final class LookupEndToEndTest {
 
   /**
    * Returns the contents of the given goal file, or the empty string if the goal file does not
-   * exist. A goal file is written with the working directory's path already replaced by {@link
-   * #workingDirPlaceholder}, so it needs no such replacement.
+   * exist. A goal file needs no such replacement.
    *
    * @param file the goal file to read
    * @return the contents of the given goal file, or the empty string
@@ -360,21 +349,21 @@ final class LookupEndToEndTest {
   /**
    * Returns the given output of the program, in a form that a goal file can record: Windows line
    * separators are replaced by Unix ones (the program terminates each line it writes with the
-   * platform's line separator), and the working directory's path is replaced by {@link
-   * #workingDirPlaceholder} (the working directory is a fresh temporary directory).
+   * platform's line separator), and the working directory's path is replaced by "${workdir}" (the
+   * working directory is a fresh temporary directory).
    *
-   * @param text output of the program
+   * @param output the output of the program
    * @param workingDir the directory in which the program ran
    * @return the given text, in a form that a goal file can record
    * @throws IOException if the working directory's real path cannot be determined
    */
-  private static String normalize(String text, Path workingDir) throws IOException {
-    String result = text.replace("\r\n", "\n");
+  private static String normalize(String output, Path workingDir) throws IOException {
+    String result = output.replace("\r\n", "\n");
     // The program might print either form of the path: it prints the working directory as the JVM
     // was told it, but a temporary directory's path can also contain a symbolic link that some
     // other operation resolves.
     for (Path dir : List.of(workingDir.toAbsolutePath(), workingDir.toRealPath())) {
-      result = result.replace(dir.toString(), workingDirPlaceholder);
+      result = result.replace(dir.toString(), "${workdir}");
     }
     return result;
   }

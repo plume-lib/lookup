@@ -272,15 +272,14 @@ import org.plumelib.util.RegexUtil;
  *
  * <!-- end options doc -->
  */
+@SuppressWarnings({
+  "PMD.FieldNamingConventions", // for `@Option` fields
+  "PMD.MutableStaticState" // TODO
+})
 public final class Lookup {
 
   /** If true, produce diagnostic output. */
-  private static final boolean debug = false;
-
-  /** This class is a collection of methods; it does not represent anything. */
-  private Lookup() {
-    throw new Error("do not instantiate");
-  }
+  private static final boolean DEBUG = false;
 
   // This uses only the first file because the default search path might be
   // something like user:system and you might want only your version of the
@@ -396,6 +395,26 @@ public final class Lookup {
   private static final String usageString = "lookup [options] <keyword> ...";
 
   /**
+   * Characters that are special in a regular expression, outside a character class. A regular
+   * expression that starts or ends with one of these might still match a word character, so {@link
+   * #checkWordMatchable} draws no conclusion from it.
+   *
+   * <p>This list intentionally omits {@code -} and {@code &}, which are special only within a
+   * character class. A search term that starts or ends within a character class starts or ends with
+   * {@code [} or {@code ]}, which are in this list.
+   */
+  private static final String regexMetacharacters = "\\^$.|?*+()[]{}";
+
+  /** Matches one word character. */
+  private static final Pattern wordCharacter =
+      Pattern.compile("\\w", Pattern.UNICODE_CHARACTER_CLASS);
+
+  /** This class is a collection of methods; it does not represent anything. */
+  private Lookup() {
+    throw new UnsupportedOperationException("do not instantiate");
+  }
+
+  /**
    * Look for the specified keywords in the file(s) and print the corresponding entries.
    *
    * @param args command-line arguments; see documentation
@@ -490,7 +509,7 @@ public final class Lookup {
     CommentFormat commentFormat =
         new CommentFormat(comment_re, multiline_comment_start_re, multiline_comment_end_re);
     try (EntryReader reader = new EntryReader(rootFile, entryFormat, commentFormat, include_re)) {
-      reader.setDebug(debug);
+      reader.setDebug(DEBUG);
 
       List<EntryReader.Entry> matchingEntries = new ArrayList<>();
 
@@ -624,21 +643,6 @@ public final class Lookup {
       }
     }
   }
-
-  /**
-   * Characters that are special in a regular expression, outside a character class. A regular
-   * expression that starts or ends with one of these might still match a word character, so {@link
-   * #checkWordMatchable} draws no conclusion from it.
-   *
-   * <p>This list intentionally omits {@code -} and {@code &}, which are special only within a
-   * character class. A search term that starts or ends within a character class starts or ends with
-   * {@code [} or {@code ]}, which are in this list.
-   */
-  private static final String regexMetacharacters = "\\^$.|?*+()[]{}";
-
-  /** Matches one word character. */
-  private static final Pattern wordCharacter =
-      Pattern.compile("\\w", Pattern.UNICODE_CHARACTER_CLASS);
 
   /**
    * If {@code --word-match} would prevent {@code keyword} from matching anything useful, prints an

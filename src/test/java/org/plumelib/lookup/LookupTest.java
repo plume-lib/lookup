@@ -27,8 +27,6 @@ import org.junit.jupiter.api.io.TempDir;
 })
 final class LookupTest {
 
-  LookupTest() {}
-
   /**
    * The separator between output lines. {@code Lookup} writes it via {@code %n}, and {@code
    * EntryReader} uses it when reconstructing an entry's body.
@@ -71,6 +69,9 @@ final class LookupTest {
    */
   private static final String entrySeven =
       "seven: " + new String(Character.toChars(0x1D44E)) + "lpha begins with a non-BMP letter";
+
+  /** Creates a new LookupTest. */
+  LookupTest() {}
 
   /** Write the entry file that the tests search. */
   @BeforeEach
