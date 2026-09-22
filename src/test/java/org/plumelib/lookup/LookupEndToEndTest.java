@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.io.TempDir;
@@ -163,7 +164,7 @@ final class LookupEndToEndTest {
                   + " contains file "
                   + name
                   + ".  Permitted files are "
-                  + permittedTestFiles
+                  + new TreeSet<>(permittedTestFiles)
                   + ".");
         }
       }
@@ -336,7 +337,8 @@ final class LookupEndToEndTest {
 
   /**
    * Returns the contents of the given goal file, or the empty string if the goal file does not
-   * exist. A goal file needs no such replacement.
+   * exist. A goal file is written with the working directory's path already replaced by
+   * "${workdir}", so it needs no such replacement.
    *
    * @param file the goal file to read
    * @return the contents of the given goal file, or the empty string
