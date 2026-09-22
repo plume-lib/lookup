@@ -273,8 +273,8 @@ import org.plumelib.util.RegexUtil;
  * <!-- end options doc -->
  */
 @SuppressWarnings({
-  "PMD.FieldNamingConventions", // for `@Option` fields
-  "PMD.MutableStaticState" // TODO
+  // "PMD.FieldNamingConventions", // for `@Option` fields
+  // "PMD.MutableStaticState" // TODO
 })
 public final class Lookup {
 
