@@ -225,15 +225,15 @@ import org.plumelib.util.RegexUtil;
  *                                                                                                comment
  *                                                                                                start).
  *                                                                     <li
- *             id="option:multiline-comment-start-re"><b>--multiline-comment-start-re=</b><i>string</i>.
- *                                                                                                                               Matches
- *                                                                                                                               the
- *                                                                                                                               start
- *                                                                                                                               of
- *                                                                                                                               a
- *                                                                                                                               possibly
- *                                                                                                                               multi-line
- *                                                                                                                               comment.
+ * id="option:multiline-comment-start-re"><b>--multiline-comment-start-re=</b><i>string</i>.
+ *                                                                                                                Matches
+ *                                                                                                                the
+ *                                                                                                                start
+ *                                                                                                                of
+ *                                                                                                                a
+ *                                                                                                                possibly
+ *                                                                                                                multi-line
+ *                                                                                                                comment.
  *                                                                     <li id="option:multiline-comment-end-re"><b>--multiline-comment-end-re=</b><i>string</i>.
  *                                                                                                              Matches
  *                                                                                                              the
