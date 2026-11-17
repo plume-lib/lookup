@@ -1,1 +1,2 @@
 --verbose prints the value of every option before searching.
+The format of the option settings comes from the command-line-option library, so the test checks only that they name every option and the entry file.

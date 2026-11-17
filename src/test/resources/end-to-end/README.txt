@@ -35,13 +35,13 @@ contains any other file is an error in the test case (probably a misspelled goal
                        file runs the program with no arguments.  If this file is absent, the program
                        is run with no arguments.
 
-  goal-out.txt         What the program should write to standard output.  If neither this file nor
-                       goal-out-contains.txt is present, the program should write nothing to
-                       standard output.
+  goal-out.txt         What the program should write to standard output.  If none of this file,
+                       goal-out-contains.txt, and goal-out-suffix.txt is present, the program
+                       should write nothing to standard output.
 
-  goal-err.txt         What the program should write to standard error.  If neither this file nor
-                       goal-err-contains.txt is present, the program should write nothing to
-                       standard error.
+  goal-err.txt         What the program should write to standard error.  If none of this file,
+                       goal-err-contains.txt, and goal-err-suffix.txt is present, the program
+                       should write nothing to standard error.
 
   goal-out-contains.txt
   goal-err-contains.txt
@@ -51,8 +51,18 @@ contains any other file is an error in the test case (probably a misspelled goal
                        output can contain other text.  An empty file permits any output.  Use this
                        file instead of goal-out.txt or goal-err.txt when the exact text of the
                        output is specific to one implementation, as the wording of a usage message
-                       or of a stack trace is.  A test case cannot have both goal-out.txt and
-                       goal-out-contains.txt, nor both goal-err.txt and goal-err-contains.txt.
+                       or of a stack trace is.
+
+  goal-out-suffix.txt
+  goal-err-suffix.txt
+                       What standard output (for goal-out-suffix.txt) or standard error (for
+                       goal-err-suffix.txt) should end with.  Use this file instead of goal-out.txt
+                       or goal-err.txt when the end of the output is the same for every
+                       implementation but what precedes it is not.  A test case can have both a
+                       contains file and a suffix file for the same stream; then the output must
+                       satisfy both.  A test case cannot have goal-out.txt together with
+                       goal-out-contains.txt or goal-out-suffix.txt, nor goal-err.txt together
+                       with goal-err-contains.txt or goal-err-suffix.txt.
 
   goal-status.txt      The program's exit status, as a decimal integer.  If this file is absent, the
                        exit status should be 0.
@@ -101,10 +111,12 @@ HOW TO RUN A TEST CASE
 9. The test case passes if all of the following hold:
    * The exit status equals the integer in goal-status.txt (ignoring surrounding whitespace), or 0
      if there is no goal-status.txt.
-   * If goal-out-contains.txt exists:  each of its lines is a substring of the normalized standard
-     output.  Otherwise, the normalized standard output equals goal-out.txt exactly.
-   * If goal-err-contains.txt exists:  each of its lines is a substring of the normalized standard
-     error.  Otherwise, the normalized standard error equals goal-err.txt exactly.
+   * If goal-out-contains.txt or goal-out-suffix.txt exists:  each line of goal-out-contains.txt
+     (if it exists) is a substring of the normalized standard output, and the normalized standard
+     output ends with the contents of goal-out-suffix.txt (if it exists).  Otherwise, the
+     normalized standard output equals goal-out.txt exactly.
+   * The same, for standard error and goal-err-contains.txt, goal-err-suffix.txt, and
+     goal-err.txt.
    * The set of the names of the files under WORKDIR equals the set recorded in step 4.  The
      program writes no files, and deletes none.
 
@@ -131,9 +143,10 @@ Where the exact text of the Java implementation's output is specific to that imp
 usage message, the diagnostics of the command-line-option library, and stack traces -- the test case
 uses goal-out-contains.txt or goal-err-contains.txt.  Those files check only what any implementation
 should mention, such as the names of the options, the offending option and value, or the file that
-could not be read; goal-status.txt still checks the exit status.  The goal files of test cases
-verbose and verbose-progress still record the Java implementation's format for the option settings
-that --verbose prints, which comes from the command-line-option library.
+could not be read; goal-status.txt still checks the exit status.  In test cases verbose and
+verbose-progress, the format of the option settings that --verbose prints comes from the
+command-line-option library, so goal-out-contains.txt checks only that the settings name every
+option and the entry file, and goal-out-suffix.txt checks the rest of the output exactly.
 
 The test cases whose description starts with "BUG:" record incorrect behavior, such as a stack
 trace or a diagnostic on standard output.  An implementation that fixes such a bug fails that test

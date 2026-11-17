@@ -62,8 +62,10 @@ final class LookupEndToEndTest {
           "description.txt",
           "goal-out.txt",
           "goal-out-contains.txt",
+          "goal-out-suffix.txt",
           "goal-err.txt",
           "goal-err-contains.txt",
+          "goal-err-suffix.txt",
           "goal-status.txt",
           "home",
           "input");
@@ -327,10 +329,12 @@ final class LookupEndToEndTest {
 
   /**
    * Fails if one of the program's output streams is not what the test case says it should be. The
-   * test case gives either the whole of the stream's text (in {@code goal-STREAM.txt}) or strings
-   * that the text should contain (in {@code goal-STREAM-contains.txt}, one per line, for output
-   * whose exact text is specific to one implementation, such as a usage message or a stack trace).
-   * If the test case gives neither file, the program should write nothing to the stream.
+   * test case gives either the whole of the stream's text (in {@code goal-STREAM.txt}), or strings
+   * that the text should contain (in {@code goal-STREAM-contains.txt}, one per line) and/or text
+   * that it should end with (in {@code goal-STREAM-suffix.txt}). The latter two are for output
+   * whose exact text is partly specific to one implementation, such as a usage message or a stack
+   * trace. If the test case gives none of these files, the program should write nothing to the
+   * stream.
    *
    * @param caseDir the test case directory
    * @param stream "out" or "err", the name of the stream in the goal files' names
@@ -342,17 +346,35 @@ final class LookupEndToEndTest {
       throws IOException {
     Path goalFile = caseDir.resolve("goal-" + stream + ".txt");
     Path containsFile = caseDir.resolve("goal-" + stream + "-contains.txt");
-    if (!Files.isRegularFile(containsFile)) {
+    Path suffixFile = caseDir.resolve("goal-" + stream + "-suffix.txt");
+    boolean hasContains = Files.isRegularFile(containsFile);
+    boolean hasSuffix = Files.isRegularFile(suffixFile);
+    if (!hasContains && !hasSuffix) {
       assertEquals(goalText(goalFile), output, context + " is wrong.");
       return;
     }
     assertTrue(
         !Files.isRegularFile(goalFile),
-        context + ":  supply at most one of " + goalFile + " and " + containsFile + ".");
-    for (String expected : goalText(containsFile).lines().toList()) {
+        context
+            + ":  do not supply "
+            + goalFile
+            + " together with "
+            + containsFile
+            + " or "
+            + suffixFile
+            + ".");
+    if (hasContains) {
+      for (String expected : goalText(containsFile).lines().toList()) {
+        assertTrue(
+            output.contains(expected),
+            context + " should contain:%n%s%nbut was:%n%s".formatted(expected, output));
+      }
+    }
+    if (hasSuffix) {
+      String suffix = goalText(suffixFile);
       assertTrue(
-          output.contains(expected),
-          context + " should contain:%n%s%nbut was:%n%s".formatted(expected, output));
+          output.endsWith(suffix),
+          context + " should end with:%n%s%nbut was:%n%s".formatted(suffix, output));
     }
   }
 

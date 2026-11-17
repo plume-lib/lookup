@@ -1,3 +1,4 @@
 --verbose prints progress information: after every 1000 entries, it prints the number of matches so
 far and the number of entries read, followed by a carriage return (not a line separator), so that
 the next progress report overwrites it on a terminal.
+The format of the option settings comes from the command-line-option library, so the test checks only that they name every option and the entry file.
