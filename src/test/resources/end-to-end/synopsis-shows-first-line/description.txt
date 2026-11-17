@@ -1,0 +1,2 @@
+The synopsis of a short entry that spans several lines is its first line, even when the match is
+only on a later line.

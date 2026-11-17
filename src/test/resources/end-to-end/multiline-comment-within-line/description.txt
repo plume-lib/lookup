@@ -1,0 +1,2 @@
+A multi-line comment can start and end within one line.  It is removed, and the text on either side
+of it remains, so a match within the comment is not reported.

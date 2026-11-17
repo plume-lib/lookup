@@ -1,0 +1,4 @@
+3 matches found. Use -i to print a specific match or -a to see them all.
+  -i=1 input/entries:1: alpha, a long entry
+  -i=2 input/entries:7: beta, another long entry
+  -i=3 input/entries:11: a short entry

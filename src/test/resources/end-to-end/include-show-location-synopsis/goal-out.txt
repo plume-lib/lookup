@@ -1,0 +1,5 @@
+4 matches found. Use -i to print a specific match or -a to see them all.
+  -i=1 input/root:1: entry before the include
+  -i=2 ${workdir}/input/included:3: first included entry
+  -i=3 ${workdir}/input/included:5: second included entry
+  -i=4 input/root:5: entry after the include

@@ -1,0 +1,5 @@
+--entry-file=input/root
+--comment-re=<
+--multiline-comment-start-re=<!--
+--multiline-comment-end-re=-->
+entry

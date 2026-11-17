@@ -1,0 +1,9 @@
+2 matches found (separated by dashes below)
+
+-------------------------
+alpha, a long entry
+its body
+
+-------------------------
+beta, another long entry
+its body

@@ -1,0 +1,5 @@
+--entry-file=input/root
+--code-fences
+--comment-re=^%
+--print-all
+entry

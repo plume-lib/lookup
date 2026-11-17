@@ -1,0 +1,1 @@
+A regular expression, like a keyword, is matched case-insensitively by default.

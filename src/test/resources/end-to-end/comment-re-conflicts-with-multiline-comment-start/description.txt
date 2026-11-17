@@ -1,0 +1,4 @@
+BUG: when --comment-re and --multiline-comment-start-re both match at the same position of a line,
+the entry reader throws an IOException, which the program does not catch, so it prints a stack
+trace and exits with status 1.  It should print an error message, as it does for other invalid
+combinations of options.

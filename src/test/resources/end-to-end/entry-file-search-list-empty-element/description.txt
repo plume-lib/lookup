@@ -1,0 +1,4 @@
+BUG: an empty file name in the --entry-file search list, as in "a::b" or a trailing colon, denotes
+the working directory, which is readable, so the program chooses it as the entry file, fails to
+read it because it is a directory, and prints a stack trace.  The program should skip the empty
+file name and use input/root.  Compare test case entry-file-is-directory.

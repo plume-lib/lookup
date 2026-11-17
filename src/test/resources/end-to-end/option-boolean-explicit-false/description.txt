@@ -1,0 +1,2 @@
+A boolean option accepts an explicit value after "=": "--print-all=false" leaves --print-all off,
+so the program prints a synopsis.

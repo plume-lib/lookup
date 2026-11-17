@@ -1,0 +1,13 @@
+4 matches found (separated by dashes below)
+
+-------------------------
+entry 1, in root
+
+-------------------------
+entry 2, in a
+
+-------------------------
+entry 3, in root
+
+-------------------------
+entry 4, in b

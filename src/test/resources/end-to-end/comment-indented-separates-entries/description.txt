@@ -1,0 +1,5 @@
+BUG: the class documentation of Lookup says "A comment line does not separate entries as a blank
+line does."  But when --comment-re matches only after leading whitespace, the program removes the
+comment and keeps the whitespace, which is a blank line, so the indented comment line below
+separates two entries.  Compare test case comment-does-not-separate-entries, in which the comment
+starts in the first column.

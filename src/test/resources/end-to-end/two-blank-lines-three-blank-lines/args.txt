@@ -1,0 +1,4 @@
+--entry-file=input/paragraphs
+--two-blank-lines
+--print-all
+entry

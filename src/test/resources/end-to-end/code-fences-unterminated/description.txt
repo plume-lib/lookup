@@ -1,0 +1,2 @@
+With --code-fences, a code fence that is never closed extends to the end of the file, so a blank
+line after its opening never ends the entry.

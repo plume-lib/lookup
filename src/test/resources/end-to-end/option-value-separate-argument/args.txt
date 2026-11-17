@@ -1,0 +1,5 @@
+--entry-file
+input/root
+--item-num
+2
+bar

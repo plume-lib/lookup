@@ -1,0 +1,2 @@
+In a search regular expression, "." does not match a line separator, so "line.second" does not
+match an entry in which "line" ends one line and "second" begins the next.

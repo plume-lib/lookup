@@ -1,0 +1,5 @@
+With --show-location, the synopsis gives the location of each match: its file and the line number
+within that file.  An entry of the included file is numbered from the start of the included file,
+and an entry of the including file that follows the directive is numbered as a line of the
+including file.  The location of an entry of an included file is an absolute path; see test case
+include-relative-to-including-file.

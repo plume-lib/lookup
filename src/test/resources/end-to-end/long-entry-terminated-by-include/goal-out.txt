@@ -1,0 +1,11 @@
+3 matches found (separated by dashes below)
+
+-------------------------
+a long entry
+body of the long entry
+
+-------------------------
+the included entry
+
+-------------------------
+text after the include directive

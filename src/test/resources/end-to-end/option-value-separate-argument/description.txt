@@ -1,0 +1,2 @@
+An option that takes a non-boolean value accepts the value as the next argument, as well as after
+"=".

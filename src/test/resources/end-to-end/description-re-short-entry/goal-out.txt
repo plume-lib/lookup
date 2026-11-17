@@ -1,0 +1,4 @@
+3 matches found. Use -i to print a specific match or -a to see them all.
+  -i=1 alpha, a long entry
+  -i=2 Name: Bob
+  -i=3 Name: Carol

@@ -1,0 +1,8 @@
+>entry alpha, a long entry
+its body mentions xyzzy
+<entry
+text after the stop marker
+
+>entry beta, another long entry
+its body mentions plugh
+<entry

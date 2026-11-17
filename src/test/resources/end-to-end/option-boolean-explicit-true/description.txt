@@ -1,0 +1,2 @@
+A boolean option accepts an explicit value after "=": "--word-match=true" is the same as
+"--word-match".

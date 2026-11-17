@@ -1,0 +1,4 @@
+-f
+input/entries
+-b
+xyzzy

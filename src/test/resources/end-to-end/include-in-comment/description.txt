@@ -1,0 +1,2 @@
+Comments are removed before include directives are recognized, so an include directive within a
+comment is ignored, and the file it names (which does not exist) is not read.

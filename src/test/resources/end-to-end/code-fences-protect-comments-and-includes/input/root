@@ -1,0 +1,10 @@
+entry with a fence
+```
+% not a comment within the fence
+\include{no-such-file}
+
+```
+% a comment after the fence
+end of the entry
+
+next entry
