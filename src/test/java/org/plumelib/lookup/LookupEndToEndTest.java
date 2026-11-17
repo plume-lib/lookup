@@ -33,6 +33,12 @@ import org.junit.jupiter.params.provider.MethodSource;
  * <p>The test data is in {@code src/test/resources/end-to-end}, one subdirectory per test case; see
  * {@code src/test/resources/end-to-end/README.txt} for the layout of a test case. Every
  * subdirectory is a test case, so a new test case can be added without changing this file.
+ *
+ * <p>By default, the program under test is this implementation of Lookup. If the system property
+ * {@code e2e.command} is set, the program under test is that command instead, which makes it
+ * possible to test another implementation of Lookup against the same test data. Gradle sets the
+ * system property from the Gradle property of the same name, as in {@code ./gradlew test --tests
+ * LookupEndToEndTest -Pe2e.command="/path/to/lookup"}.
  */
 final class LookupEndToEndTest {
 
@@ -41,6 +47,13 @@ final class LookupEndToEndTest {
 
   /** The directory that contains one subdirectory per test case. */
   private static final Path testDataDir = findTestDataDir();
+
+  /**
+   * The system property that, if set, gives the command that runs the program under test. The
+   * command is split into words at whitespace (there is no quoting), and the test case's arguments
+   * are appended to those words.
+   */
+  private static final String commandProperty = "e2e.command";
 
   /** The file names that may appear in a test case directory. */
   private static final Set<String> permittedTestFiles =
@@ -127,9 +140,10 @@ final class LookupEndToEndTest {
     Set<String> filesBefore = relativeFileNames(workingDir).keySet();
 
     List<String> args = arguments(caseDir);
+    Path stdinFile = Files.createFile(captureDir.resolve("stdin.txt"));
     Path stdoutFile = captureDir.resolve("stdout.txt");
     Path stderrFile = captureDir.resolve("stderr.txt");
-    int status = runProgram(workingDir, homeDir, args, stdoutFile, stderrFile);
+    int status = runProgram(workingDir, homeDir, args, stdinFile, stdoutFile, stderrFile);
 
     String context = "Test case " + caseName + ", arguments " + args + ".";
 
@@ -188,11 +202,12 @@ final class LookupEndToEndTest {
   }
 
   /**
-   * Runs the program.
+   * Runs the program, with an empty standard input.
    *
    * @param workingDir the working directory for the program
    * @param homeDir the home directory for the program
    * @param args the command-line arguments for the program
+   * @param stdinFile an empty file, from which the program reads its standard input
    * @param stdoutFile where to write the program's standard output
    * @param stderrFile where to write the program's standard error
    * @return the program's exit status
@@ -200,31 +215,64 @@ final class LookupEndToEndTest {
    * @throws InterruptedException if this thread is interrupted while the program runs
    */
   private static int runProgram(
-      Path workingDir, Path homeDir, List<String> args, Path stdoutFile, Path stderrFile)
+      Path workingDir,
+      Path homeDir,
+      List<String> args,
+      Path stdinFile,
+      Path stdoutFile,
+      Path stderrFile)
       throws IOException, InterruptedException {
-    List<String> command = new ArrayList<>();
-    command.add(javaExecutable());
-    command.add("-cp");
-    command.add(classpath());
-    command.add("-Duser.home=" + homeDir);
-    // The program's input files are UTF-8 no matter what the platform's encoding is, so make its
-    // output UTF-8 too; otherwise a goal file could not record non-ASCII output.
-    command.add("-Dstdout.encoding=UTF-8");
-    command.add("-Dstderr.encoding=UTF-8");
-    command.add(Lookup.class.getName());
+    List<String> command = new ArrayList<>(programCommand(homeDir));
     command.addAll(args);
-    Process process =
+    ProcessBuilder builder =
         new ProcessBuilder(command)
             .directory(workingDir.toFile())
+            .redirectInput(stdinFile.toFile())
             .redirectOutput(stdoutFile.toFile())
-            .redirectError(stderrFile.toFile())
-            .start();
+            .redirectError(stderrFile.toFile());
+    // An implementation in another language learns its home directory from this variable.
+    builder.environment().put("HOME", homeDir.toString());
+    Process process = builder.start();
     int timeoutSeconds = 120;
     if (!process.waitFor(timeoutSeconds, TimeUnit.SECONDS)) {
       process.destroyForcibly();
       throw new Error("The program did not terminate within " + timeoutSeconds + " seconds.");
     }
     return process.exitValue();
+  }
+
+  /**
+   * Returns the command that runs the program under test, not including the test case's arguments.
+   * The command is the value of the system property {@link #commandProperty} if it is set, and
+   * otherwise is a command that runs this implementation of Lookup in a new JVM.
+   *
+   * @param homeDir the home directory for the program
+   * @return the command that runs the program under test
+   */
+  private static List<String> programCommand(Path homeDir) {
+    String externalCommand = System.getProperty(commandProperty);
+    if (externalCommand != null && !externalCommand.isBlank()) {
+      List<String> result = new ArrayList<>(List.of(externalCommand.trim().split("\\s+")));
+      // The program runs in a temporary working directory, so make a relative path to the
+      // executable absolute.  A bare name, such as "python3", is looked up on the PATH.
+      String executable = result.get(0);
+      if (executable.indexOf('/') != -1 || executable.indexOf(File.separatorChar) != -1) {
+        result.set(0, Path.of(executable).toAbsolutePath().toString());
+      }
+      return result;
+    }
+    List<String> result = new ArrayList<>();
+    result.add(javaExecutable());
+    result.add("-cp");
+    result.add(classpath());
+    // Java determines the home directory from the user database rather than from $HOME.
+    result.add("-Duser.home=" + homeDir);
+    // The program's input files are UTF-8 no matter what the platform's encoding is, so make its
+    // output UTF-8 too; otherwise a goal file could not record non-ASCII output.
+    result.add("-Dstdout.encoding=UTF-8");
+    result.add("-Dstderr.encoding=UTF-8");
+    result.add(Lookup.class.getName());
+    return result;
   }
 
   /**

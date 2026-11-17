@@ -127,6 +127,11 @@ tasks.withType<Test>().configureEach {
   outputs.upToDateWhen { false }
   outputs.cacheIf { false }
 
+  // Run the end-to-end tests against another implementation of Lookup, as in
+  //   ./gradlew test --tests LookupEndToEndTest -Pe2e.command="/path/to/lookup"
+  // See src/test/resources/end-to-end/README.txt.
+  project.findProperty("e2e.command")?.let { systemProperty("e2e.command", it.toString()) }
+
   testLogging {
     // "passed" is what makes the forced re-run above worth its cost:  without it, a run in which
     // every test passes prints nothing at all.
