@@ -1,0 +1,1 @@
+seven: 𝑎lpha begins with a non-BMP letter

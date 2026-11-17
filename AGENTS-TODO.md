@@ -18,17 +18,8 @@ done, delete this file and commit the deletion.
 
 ## Checklist
 
-- [ ] Convert the cases of `LookupTest.java` that no test case covers:
-  supplementary-plane word, `-e -w caf\w`, `-w` with `-c`, `-w` conjunction
-  with no common entry, `-e #define`, `-e -w foo-`, `-e \Qfoo`,
-  `--item-num` with `--show-location`, `--item-num=1` with one match.
-  Then delete `LookupTest.java`.
-- [ ] Harness: give the program an empty standard input, set the `HOME`
-  environment variable, and support running an external command via
-  `-Pe2e.command=...` (system property `e2e.command`).
-- [ ] README.txt: document invocation in language-neutral terms (working
-  directory, arguments, standard input, environment, compared files,
-  normalization, external command).
+- [x] Convert `LookupTest.java` into test cases and delete it.
+- [x] Harness: empty standard input, `HOME`, `-Pe2e.command=...`.
 - [ ] New test cases: option syntax (separate value, explicit boolean value,
   underscore names, options after keywords, short names `-e -c -b -i -h`),
   invalid option values (`--item-num=abc`, negative, invalid

@@ -1,0 +1,3 @@
+"\Q" without a matching "\E" quotes the rest of a regular expression, so "\Qre-en" is a valid
+regular expression that matches "re-en" literally.  Compare test case
+word-match-composed-regex-invalid, in which --word-match makes such a search term invalid.

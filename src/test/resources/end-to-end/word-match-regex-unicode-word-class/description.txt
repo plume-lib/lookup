@@ -1,0 +1,3 @@
+"\w" means the same thing whether or not --word-match is supplied: in both cases it matches the
+non-ASCII word character "é", so "caf\w" matches "café".  Compare test case
+regex-unicode-word-class, which omits --word-match.

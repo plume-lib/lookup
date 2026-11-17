@@ -1,0 +1,1 @@
+A --word-match search is case-insensitive by default.

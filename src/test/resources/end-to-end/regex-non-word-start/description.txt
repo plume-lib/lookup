@@ -1,0 +1,2 @@
+Without --word-match, a regular expression that starts with a non-word character is permitted and
+is found.  Compare test case word-match-non-word-start-regex.
