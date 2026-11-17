@@ -1,4 +1,4 @@
-A value that is not an integer, for an option that takes one, is diagnosed by the
+BUG: a value that is not an integer, for an option that takes one, is diagnosed by the
 command-line-option library.  As with test case unknown-option, the diagnostic and the usage
-message go to standard output.
+message go to standard output rather than to standard error.
 See https://github.com/plume-lib/lookup/issues/571.
