@@ -2,3 +2,4 @@ BUG: with --show-location, the synopsis of a match shows the first line of the e
 the text that --description-re matches, so --show-location changes the text of the synopsis in
 addition to adding the location.  Compare test case description-re-short-entry, which omits
 --show-location.
+See https://github.com/plume-lib/lookup/issues/570.

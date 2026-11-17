@@ -3,3 +3,4 @@ line does."  But when --comment-re matches only after leading whitespace, the pr
 comment and keeps the whitespace, which is a blank line, so the indented comment line below
 separates two entries.  Compare test case comment-does-not-separate-entries, in which the comment
 starts in the first column.
+See https://github.com/plume-lib/lookup/issues/568.

@@ -1,2 +1,3 @@
 BUG: a file that includes itself makes the program recurse until it runs out of stack (or of file
 descriptors), so it prints a stack trace and exits with status 1.  It should report the cycle.
+See https://github.com/plume-lib/lookup/issues/564.
