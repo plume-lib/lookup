@@ -20,19 +20,10 @@ done, delete this file and commit the deletion.
 
 - [x] Convert `LookupTest.java` into test cases and delete it.
 - [x] Harness: empty standard input, `HOME`, `-Pe2e.command=...`.
-- [ ] New test cases: option syntax (separate value, explicit boolean value,
-  underscore names, options after keywords, short names `-e -c -b -i -h`),
-  invalid option values (`--item-num=abc`, negative, invalid
-  `--entry-start-re`, `--description-re`, `--include-re`,
-  `--multiline-comment-start-re`).
-- [ ] New test cases: entry file (`~` expansion, empty component, empty
-  `--entry-file`), non-UTF-8 input.
-- [ ] New test cases: includes (gzipped include, include in a comment,
-  include cycle, `~` in include, long entry ended by include, location of an
-  included entry's line number).
-- [ ] New test cases: comments (multi-line comment on one line, multi-line
-  comment containing blank lines), long entries (blank lines in a long entry,
-  synopsis and `--show-location` synopsis of long entries), regex across lines,
-  case-sensitive regex, synopsis shows first line, verbose progress.
+- [x] New test cases (options, entry file, includes, comments, long entries,
+  search, verbose).
+- [ ] README.txt: document invocation in language-neutral terms (working
+  directory, arguments, standard input, environment, compared files,
+  normalization, external command).
 - [ ] `./gradlew spotlessApply build` passes; markdownlint passes.
 - [ ] Delete this file and commit.
