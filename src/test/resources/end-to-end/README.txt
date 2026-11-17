@@ -35,16 +35,24 @@ contains any other file is an error in the test case (probably a misspelled goal
                        file runs the program with no arguments.  If this file is absent, the program
                        is run with no arguments.
 
-  goal-out.txt         What the program should write to standard output.  If this file is absent,
-                       the program should write nothing to standard output.
+  goal-out.txt         What the program should write to standard output.  If neither this file nor
+                       goal-out-contains.txt is present, the program should write nothing to
+                       standard output.
 
   goal-err.txt         What the program should write to standard error.  If neither this file nor
-                       goal-err-prefix.txt is present, the program should write nothing to standard
-                       error.
+                       goal-err-contains.txt is present, the program should write nothing to
+                       standard error.
 
-  goal-err-prefix.txt  What the program's standard error should start with.  Use this file instead
-                       of goal-err.txt when the rest of the output would make the goal file
-                       brittle, as a stack trace's line numbers would.
+  goal-out-contains.txt
+  goal-err-contains.txt
+                       Strings that standard output (for goal-out-contains.txt) or standard error
+                       (for goal-err-contains.txt) should contain, one per line.  Each line must
+                       occur somewhere in the output; the lines can occur in any order, and the
+                       output can contain other text.  An empty file permits any output.  Use this
+                       file instead of goal-out.txt or goal-err.txt when the exact text of the
+                       output is specific to one implementation, as the wording of a usage message
+                       or of a stack trace is.  A test case cannot have both goal-out.txt and
+                       goal-out-contains.txt, nor both goal-err.txt and goal-err-contains.txt.
 
   goal-status.txt      The program's exit status, as a decimal integer.  If this file is absent, the
                        exit status should be 0.
@@ -87,21 +95,22 @@ HOW TO RUN A TEST CASE
       because the program might print either.
 
 8. Read each goal file, replacing each CRLF by LF.  A missing goal-out.txt or goal-err.txt is the
-   same as an empty one.
+   same as an empty one.  Split goal-out-contains.txt and goal-err-contains.txt into lines as step 5
+   splits args.txt.
 
 9. The test case passes if all of the following hold:
    * The exit status equals the integer in goal-status.txt (ignoring surrounding whitespace), or 0
      if there is no goal-status.txt.
-   * The normalized standard output equals goal-out.txt exactly.
-   * If goal-err-prefix.txt exists:  the normalized standard error starts with the contents of
-     goal-err-prefix.txt, after trailing whitespace (including the final line separator) is removed
-     from those contents.  Otherwise, the normalized standard error equals goal-err.txt exactly.
+   * If goal-out-contains.txt exists:  each of its lines is a substring of the normalized standard
+     output.  Otherwise, the normalized standard output equals goal-out.txt exactly.
+   * If goal-err-contains.txt exists:  each of its lines is a substring of the normalized standard
+     error.  Otherwise, the normalized standard error equals goal-err.txt exactly.
    * The set of the names of the files under WORKDIR equals the set recorded in step 4.  The
      program writes no files, and deletes none.
 
-The comparisons are of text, not of bytes:  a goal file that ends with a line separator expects the
-program's output to end with one, and a goal file that does not end with one expects output that
-does not.
+The comparisons are of text, not of bytes:  a goal-out.txt or goal-err.txt file that ends with a
+line separator expects the program's output to end with one, and one that does not end with one
+expects output that does not.
 
 
 TESTING ANOTHER IMPLEMENTATION
@@ -118,11 +127,17 @@ to the directory from which the tests run, which for Gradle is the project's roo
 otherwise the first word is looked up on the PATH.  When e2e.command is not set, the harness runs
 the Java implementation in a new JVM.
 
-Some goal files record details that are specific to the Java implementation:
-  * the usage message (for example, in test case help) and the diagnostics of the
-    command-line-option library, which another implementation needs to reproduce exactly, and
-  * the stack traces of the test cases whose description starts with "BUG:".  An implementation that
-    fixes such a bug fails that test case; update its goal files when the bug is fixed.
+Where the exact text of the Java implementation's output is specific to that implementation -- the
+usage message, the diagnostics of the command-line-option library, and stack traces -- the test case
+uses goal-out-contains.txt or goal-err-contains.txt.  Those files check only what any implementation
+should mention, such as the names of the options, the offending option and value, or the file that
+could not be read; goal-status.txt still checks the exit status.  The goal files of test cases
+verbose and verbose-progress still record the Java implementation's format for the option settings
+that --verbose prints, which comes from the command-line-option library.
+
+The test cases whose description starts with "BUG:" record incorrect behavior, such as a stack
+trace or a diagnostic on standard output.  An implementation that fixes such a bug fails that test
+case; update its goal files when the bug is fixed.
 Some error messages come from the operating system; for example, "Is a directory" is the message
 on Linux.
 

@@ -61,8 +61,9 @@ final class LookupEndToEndTest {
           "args.txt",
           "description.txt",
           "goal-out.txt",
+          "goal-out-contains.txt",
           "goal-err.txt",
-          "goal-err-prefix.txt",
+          "goal-err-contains.txt",
           "goal-status.txt",
           "home",
           "input");
@@ -148,11 +149,10 @@ final class LookupEndToEndTest {
     String context = "Test case " + caseName + ", arguments " + args + ".";
 
     assertEquals(goalStatus(caseDir), status, context + "  Wrong exit status.");
-    assertEquals(
-        goalText(caseDir.resolve("goal-out.txt")),
-        normalize(readText(stdoutFile), workingDir),
-        context + "  Wrong standard output.");
-    checkStderr(caseDir, normalize(readText(stderrFile), workingDir), context);
+    checkOutput(
+        caseDir, "out", normalize(readText(stdoutFile), workingDir), context + "  Standard output");
+    checkOutput(
+        caseDir, "err", normalize(readText(stderrFile), workingDir), context + "  Standard error");
     assertEquals(
         String.join(System.lineSeparator(), filesBefore),
         String.join(System.lineSeparator(), relativeFileNames(workingDir).keySet()),
@@ -326,30 +326,34 @@ final class LookupEndToEndTest {
   }
 
   /**
-   * Fails if the program's standard error is not what the test case says it should be. The test
-   * case gives either the whole of the standard error (in {@code goal-err.txt}) or a prefix of it
-   * (in {@code goal-err-prefix.txt}, for output such as a stack trace that contains line numbers
-   * that would make a whole-text goal file brittle). If the test case gives neither file, the
-   * program should write nothing to standard error.
+   * Fails if one of the program's output streams is not what the test case says it should be. The
+   * test case gives either the whole of the stream's text (in {@code goal-STREAM.txt}) or strings
+   * that the text should contain (in {@code goal-STREAM-contains.txt}, one per line, for output
+   * whose exact text is specific to one implementation, such as a usage message or a stack trace).
+   * If the test case gives neither file, the program should write nothing to the stream.
    *
    * @param caseDir the test case directory
-   * @param stderr what the program wrote to standard error
-   * @param context a description of the test case, for failure messages
+   * @param stream "out" or "err", the name of the stream in the goal files' names
+   * @param output what the program wrote to the stream
+   * @param context a description of the test case and the stream; used for diagnostics
    * @throws IOException if a goal file cannot be read
    */
-  private static void checkStderr(Path caseDir, String stderr, String context) throws IOException {
-    Path prefixFile = caseDir.resolve("goal-err-prefix.txt");
-    if (Files.isRegularFile(prefixFile)) {
-      // Remove the goal file's final line separator, which is not part of the prefix.
-      String prefix = goalText(prefixFile).stripTrailing();
-      assertTrue(
-          stderr.startsWith(prefix),
-          context
-              + "  Standard error should start with:%n%s%nbut was:%n%s".formatted(prefix, stderr));
+  private static void checkOutput(Path caseDir, String stream, String output, String context)
+      throws IOException {
+    Path goalFile = caseDir.resolve("goal-" + stream + ".txt");
+    Path containsFile = caseDir.resolve("goal-" + stream + "-contains.txt");
+    if (!Files.isRegularFile(containsFile)) {
+      assertEquals(goalText(goalFile), output, context + " is wrong.");
       return;
     }
-    assertEquals(
-        goalText(caseDir.resolve("goal-err.txt")), stderr, context + "  Wrong standard error.");
+    assertTrue(
+        !Files.isRegularFile(goalFile),
+        context + ":  supply at most one of " + goalFile + " and " + containsFile + ".");
+    for (String expected : goalText(containsFile).lines().toList()) {
+      assertTrue(
+          output.contains(expected),
+          context + " should contain:%n%s%nbut was:%n%s".formatted(expected, output));
+    }
   }
 
   /**
