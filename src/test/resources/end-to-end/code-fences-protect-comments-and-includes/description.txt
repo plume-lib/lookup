@@ -1,0 +1,3 @@
+With --code-fences, the lines within a code fence are taken literally: a comment within a fence is
+not removed, and an include directive within a fence is not processed.  A comment after the closing
+fence is removed.

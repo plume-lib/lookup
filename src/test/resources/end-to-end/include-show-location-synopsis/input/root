@@ -1,0 +1,5 @@
+entry before the include
+
+\include{included}
+
+entry after the include

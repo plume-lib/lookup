@@ -1,0 +1,2 @@
+Options and keywords can be interleaved: an option that follows a keyword is still an option, not a
+keyword.

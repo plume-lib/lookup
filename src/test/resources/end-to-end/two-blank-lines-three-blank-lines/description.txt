@@ -1,0 +1,2 @@
+With --two-blank-lines, any run of two or more blank lines separates entries; a third blank line is
+not part of the next entry.

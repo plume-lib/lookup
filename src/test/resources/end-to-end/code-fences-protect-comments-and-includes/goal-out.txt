@@ -1,0 +1,13 @@
+2 matches found (separated by dashes below)
+
+-------------------------
+entry with a fence
+```
+% not a comment within the fence
+\include{no-such-file}
+
+```
+end of the entry
+
+-------------------------
+next entry

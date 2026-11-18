@@ -1,0 +1,4 @@
+--entry-file=input/entries
+--entry-start-re=^>entry 
+--print-all
+entry

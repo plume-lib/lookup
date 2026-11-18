@@ -1,0 +1,1 @@
+An --include-re that is not a regular expression is diagnosed.

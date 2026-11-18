@@ -1,0 +1,3 @@
+The synopsis of a short entry, too, is the text that --description-re matches, even though the help
+text for --description-re says that it is "for long entries".  When --description-re matches
+nothing in an entry, the synopsis is the first line.

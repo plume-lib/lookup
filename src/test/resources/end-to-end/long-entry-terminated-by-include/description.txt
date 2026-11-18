@@ -1,0 +1,2 @@
+A long entry ends at an include directive, because an entry does not span a change of file.  The
+lines that follow the included file form a new, short, entry.

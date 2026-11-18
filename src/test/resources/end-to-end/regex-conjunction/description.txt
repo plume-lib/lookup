@@ -1,0 +1,1 @@
+Multiple regular expressions are conjoined: an entry matches only if every one of them matches it.

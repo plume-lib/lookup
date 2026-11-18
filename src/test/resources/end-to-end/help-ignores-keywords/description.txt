@@ -1,0 +1,2 @@
+--help prints the usage message and exits, without searching, even when keywords and an entry file
+are supplied.

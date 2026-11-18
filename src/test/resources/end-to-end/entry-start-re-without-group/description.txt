@@ -1,0 +1,2 @@
+--entry-start-re need not have a group; then the whole match is removed from the first line of a
+long entry.

@@ -1,0 +1,2 @@
+A keyword that contains a space does not match a line break, because the entry contains a line
+separator, not a space, at that point.

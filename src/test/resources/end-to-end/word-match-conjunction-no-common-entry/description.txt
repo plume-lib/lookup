@@ -1,0 +1,3 @@
+An entry matches only if it contains every keyword.  Under --word-match, "bar" is a whole word only
+in entry one and "embargo" is a whole word only in entry two, so no entry contains both and nothing
+is found.

@@ -1,0 +1,1 @@
+--case-sensitive applies to a regular expression: "PRE[A-Z]+" does not match "prequx".

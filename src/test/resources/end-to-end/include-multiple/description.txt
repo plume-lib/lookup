@@ -1,0 +1,2 @@
+A file can contain several include directives, and the entries of the included files are searched
+in the order in which the directives appear, interleaved with the including file's own entries.

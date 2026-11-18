@@ -1,0 +1,7 @@
+entry 1, in root
+
+\include{a}
+
+entry 3, in root
+
+\include{b}

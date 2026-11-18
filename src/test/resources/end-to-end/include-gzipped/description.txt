@@ -1,0 +1,2 @@
+An included file whose name ends with ".gz" is uncompressed as it is read, just like a compressed
+entry file.

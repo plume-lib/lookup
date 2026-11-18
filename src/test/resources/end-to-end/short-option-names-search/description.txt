@@ -1,0 +1,2 @@
+This test case supplies the short names of --regular-expressions, --case-sensitive, and --item-num.
+ Compare test case short-option-names.

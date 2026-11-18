@@ -1,0 +1,1 @@
+"~" is expanded in every file name of an --entry-file search list, not just the first.

@@ -1,0 +1,7 @@
+2 matches found (separated by dashes below)
+
+-------------------------
+entry in the root file
+
+-------------------------
+entry in the home directory

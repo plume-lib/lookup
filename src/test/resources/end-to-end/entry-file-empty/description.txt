@@ -1,0 +1,4 @@
+BUG: an empty --entry-file denotes the working directory, which is readable, so the program chooses
+it as the entry file, fails to read it because it is a directory, and prints a stack trace.  It
+should report that it cannot read any entry file.
+See https://github.com/plume-lib/lookup/issues/563.

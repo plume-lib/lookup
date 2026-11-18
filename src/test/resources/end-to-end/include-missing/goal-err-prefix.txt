@@ -1,1 +1,0 @@
-Exception in thread "main" java.nio.file.NoSuchFileException: ${workdir}/input/no-such-file

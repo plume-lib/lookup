@@ -1,0 +1,1 @@
+--case-sensitive applies to a --word-match search: "BAR" does not match the whole word "bar".

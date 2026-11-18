@@ -1,0 +1,3 @@
+Input files are read as UTF-8.  A byte sequence that is not valid UTF-8 (here, the ISO-8859-1
+encoding of "é") is not diagnosed: the program decodes it as the replacement character U+FFFD, and
+the entry is still searched and printed.

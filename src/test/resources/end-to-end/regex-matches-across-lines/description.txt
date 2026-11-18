@@ -1,0 +1,2 @@
+A search regular expression is matched against a whole entry, so it can match across a line break:
+"\s" matches the line separator.

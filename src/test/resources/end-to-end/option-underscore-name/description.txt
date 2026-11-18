@@ -1,0 +1,2 @@
+An option name is permitted to use underscores in place of hyphens: "--print_all" is the same as
+"--print-all".

@@ -1,0 +1,5 @@
+A search term that starts with a word character outside the Basic Multilingual Plane, U+1D44E
+(MATHEMATICAL ITALIC SMALL A), is a whole word under --word-match.  The check for a non-word
+character at the start of a search term examines the first code point, not the first UTF-16 code
+unit; a lone surrogate is not a word character, so examining the code unit would wrongly reject the
+search.

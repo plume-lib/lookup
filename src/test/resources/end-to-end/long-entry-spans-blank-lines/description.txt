@@ -1,0 +1,2 @@
+A blank line does not end a long entry: only a stop marker, the start of another long entry, or a
+change of file does.

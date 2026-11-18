@@ -1,0 +1,4 @@
+--entry-file=input/root
+--item-num=2
+--show-location
+bar

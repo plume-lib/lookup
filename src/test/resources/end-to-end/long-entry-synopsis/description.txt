@@ -1,0 +1,2 @@
+When several long entries match, the synopsis of each is its description: the first line, without
+the ">entry " marker.  The synopsis of a short entry is its first line.

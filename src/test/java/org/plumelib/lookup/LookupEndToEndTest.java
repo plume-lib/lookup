@@ -33,6 +33,12 @@ import org.junit.jupiter.params.provider.MethodSource;
  * <p>The test data is in {@code src/test/resources/end-to-end}, one subdirectory per test case; see
  * {@code src/test/resources/end-to-end/README.txt} for the layout of a test case. Every
  * subdirectory is a test case, so a new test case can be added without changing this file.
+ *
+ * <p>By default, the program under test is this implementation of Lookup. If the system property
+ * {@code e2e.command} is set, the program under test is that command instead, which makes it
+ * possible to test another implementation of Lookup against the same test data. Gradle sets the
+ * system property from the Gradle property of the same name, as in {@code ./gradlew test --tests
+ * LookupEndToEndTest -Pe2e.command="/path/to/lookup"}.
  */
 final class LookupEndToEndTest {
 
@@ -42,14 +48,24 @@ final class LookupEndToEndTest {
   /** The directory that contains one subdirectory per test case. */
   private static final Path testDataDir = findTestDataDir();
 
+  /**
+   * The system property that, if set, gives the command that runs the program under test. The
+   * command is split into words at whitespace (there is no quoting), and the test case's arguments
+   * are appended to those words.
+   */
+  private static final String commandProperty = "e2e.command";
+
   /** The file names that may appear in a test case directory. */
   private static final Set<String> permittedTestFiles =
       Set.of(
           "args.txt",
           "description.txt",
           "goal-out.txt",
+          "goal-out-contains.txt",
+          "goal-out-suffix.txt",
           "goal-err.txt",
-          "goal-err-prefix.txt",
+          "goal-err-contains.txt",
+          "goal-err-suffix.txt",
           "goal-status.txt",
           "home",
           "input");
@@ -127,18 +143,18 @@ final class LookupEndToEndTest {
     Set<String> filesBefore = relativeFileNames(workingDir).keySet();
 
     List<String> args = arguments(caseDir);
+    Path stdinFile = Files.createFile(captureDir.resolve("stdin.txt"));
     Path stdoutFile = captureDir.resolve("stdout.txt");
     Path stderrFile = captureDir.resolve("stderr.txt");
-    int status = runProgram(workingDir, homeDir, args, stdoutFile, stderrFile);
+    int status = runProgram(workingDir, homeDir, args, stdinFile, stdoutFile, stderrFile);
 
     String context = "Test case " + caseName + ", arguments " + args + ".";
 
     assertEquals(goalStatus(caseDir), status, context + "  Wrong exit status.");
-    assertEquals(
-        goalText(caseDir.resolve("goal-out.txt")),
-        normalize(readText(stdoutFile), workingDir),
-        context + "  Wrong standard output.");
-    checkStderr(caseDir, normalize(readText(stderrFile), workingDir), context);
+    checkOutput(
+        caseDir, "out", normalize(readText(stdoutFile), workingDir), context + "  Standard output");
+    checkOutput(
+        caseDir, "err", normalize(readText(stderrFile), workingDir), context + "  Standard error");
     assertEquals(
         String.join(System.lineSeparator(), filesBefore),
         String.join(System.lineSeparator(), relativeFileNames(workingDir).keySet()),
@@ -188,11 +204,12 @@ final class LookupEndToEndTest {
   }
 
   /**
-   * Runs the program.
+   * Runs the program, with an empty standard input.
    *
    * @param workingDir the working directory for the program
    * @param homeDir the home directory for the program
    * @param args the command-line arguments for the program
+   * @param stdinFile an empty file, from which the program reads its standard input
    * @param stdoutFile where to write the program's standard output
    * @param stderrFile where to write the program's standard error
    * @return the program's exit status
@@ -200,31 +217,64 @@ final class LookupEndToEndTest {
    * @throws InterruptedException if this thread is interrupted while the program runs
    */
   private static int runProgram(
-      Path workingDir, Path homeDir, List<String> args, Path stdoutFile, Path stderrFile)
+      Path workingDir,
+      Path homeDir,
+      List<String> args,
+      Path stdinFile,
+      Path stdoutFile,
+      Path stderrFile)
       throws IOException, InterruptedException {
-    List<String> command = new ArrayList<>();
-    command.add(javaExecutable());
-    command.add("-cp");
-    command.add(classpath());
-    command.add("-Duser.home=" + homeDir);
-    // The program's input files are UTF-8 no matter what the platform's encoding is, so make its
-    // output UTF-8 too; otherwise a goal file could not record non-ASCII output.
-    command.add("-Dstdout.encoding=UTF-8");
-    command.add("-Dstderr.encoding=UTF-8");
-    command.add(Lookup.class.getName());
+    List<String> command = new ArrayList<>(programCommand(homeDir));
     command.addAll(args);
-    Process process =
+    ProcessBuilder builder =
         new ProcessBuilder(command)
             .directory(workingDir.toFile())
+            .redirectInput(stdinFile.toFile())
             .redirectOutput(stdoutFile.toFile())
-            .redirectError(stderrFile.toFile())
-            .start();
+            .redirectError(stderrFile.toFile());
+    // An implementation in another language learns its home directory from this variable.
+    builder.environment().put("HOME", homeDir.toString());
+    Process process = builder.start();
     int timeoutSeconds = 120;
     if (!process.waitFor(timeoutSeconds, TimeUnit.SECONDS)) {
       process.destroyForcibly();
       throw new Error("The program did not terminate within " + timeoutSeconds + " seconds.");
     }
     return process.exitValue();
+  }
+
+  /**
+   * Returns the command that runs the program under test, not including the test case's arguments.
+   * The command is the value of the system property {@link #commandProperty} if it is set, and
+   * otherwise is a command that runs this implementation of Lookup in a new JVM.
+   *
+   * @param homeDir the home directory for the program
+   * @return the command that runs the program under test
+   */
+  private static List<String> programCommand(Path homeDir) {
+    String externalCommand = System.getProperty(commandProperty);
+    if (externalCommand != null && !externalCommand.isBlank()) {
+      List<String> result = new ArrayList<>(List.of(externalCommand.trim().split("\\s+")));
+      // The program runs in a temporary working directory, so make a relative path to the
+      // executable absolute.  A bare name, such as "python3", is looked up on the PATH.
+      String executable = result.get(0);
+      if (executable.indexOf('/') != -1 || executable.indexOf(File.separatorChar) != -1) {
+        result.set(0, Path.of(executable).toAbsolutePath().toString());
+      }
+      return result;
+    }
+    List<String> result = new ArrayList<>();
+    result.add(javaExecutable());
+    result.add("-cp");
+    result.add(classpath());
+    // Java determines the home directory from the user database rather than from $HOME.
+    result.add("-Duser.home=" + homeDir);
+    // The program's input files are UTF-8 no matter what the platform's encoding is, so make its
+    // output UTF-8 too; otherwise a goal file could not record non-ASCII output.
+    result.add("-Dstdout.encoding=UTF-8");
+    result.add("-Dstderr.encoding=UTF-8");
+    result.add(Lookup.class.getName());
+    return result;
   }
 
   /**
@@ -278,30 +328,54 @@ final class LookupEndToEndTest {
   }
 
   /**
-   * Fails if the program's standard error is not what the test case says it should be. The test
-   * case gives either the whole of the standard error (in {@code goal-err.txt}) or a prefix of it
-   * (in {@code goal-err-prefix.txt}, for output such as a stack trace that contains line numbers
-   * that would make a whole-text goal file brittle). If the test case gives neither file, the
-   * program should write nothing to standard error.
+   * Fails if one of the program's output streams is not what the test case says it should be. The
+   * test case gives either the whole of the stream's text (in {@code goal-STREAM.txt}), or strings
+   * that the text should contain (in {@code goal-STREAM-contains.txt}, one per line) and/or text
+   * that it should end with (in {@code goal-STREAM-suffix.txt}). The latter two are for output
+   * whose exact text is partly specific to one implementation, such as a usage message or a stack
+   * trace. If the test case gives none of these files, the program should write nothing to the
+   * stream.
    *
    * @param caseDir the test case directory
-   * @param stderr what the program wrote to standard error
-   * @param context a description of the test case, for failure messages
+   * @param stream "out" or "err", the name of the stream in the goal files' names
+   * @param output what the program wrote to the stream
+   * @param context a description of the test case and the stream; used for diagnostics
    * @throws IOException if a goal file cannot be read
    */
-  private static void checkStderr(Path caseDir, String stderr, String context) throws IOException {
-    Path prefixFile = caseDir.resolve("goal-err-prefix.txt");
-    if (Files.isRegularFile(prefixFile)) {
-      // Remove the goal file's final line separator, which is not part of the prefix.
-      String prefix = goalText(prefixFile).stripTrailing();
-      assertTrue(
-          stderr.startsWith(prefix),
-          context
-              + "  Standard error should start with:%n%s%nbut was:%n%s".formatted(prefix, stderr));
+  private static void checkOutput(Path caseDir, String stream, String output, String context)
+      throws IOException {
+    Path goalFile = caseDir.resolve("goal-" + stream + ".txt");
+    Path containsFile = caseDir.resolve("goal-" + stream + "-contains.txt");
+    Path suffixFile = caseDir.resolve("goal-" + stream + "-suffix.txt");
+    boolean hasContains = Files.isRegularFile(containsFile);
+    boolean hasSuffix = Files.isRegularFile(suffixFile);
+    if (!hasContains && !hasSuffix) {
+      assertEquals(goalText(goalFile), output, context + " is wrong.");
       return;
     }
-    assertEquals(
-        goalText(caseDir.resolve("goal-err.txt")), stderr, context + "  Wrong standard error.");
+    assertTrue(
+        !Files.isRegularFile(goalFile),
+        context
+            + ":  do not supply "
+            + goalFile
+            + " together with "
+            + containsFile
+            + " or "
+            + suffixFile
+            + ".");
+    if (hasContains) {
+      for (String expected : goalText(containsFile).lines().toList()) {
+        assertTrue(
+            output.contains(expected),
+            context + " should contain:%n%s%nbut was:%n%s".formatted(expected, output));
+      }
+    }
+    if (hasSuffix) {
+      String suffix = goalText(suffixFile);
+      assertTrue(
+          output.endsWith(suffix),
+          context + " should end with:%n%s%nbut was:%n%s".formatted(suffix, output));
+    }
   }
 
   /**

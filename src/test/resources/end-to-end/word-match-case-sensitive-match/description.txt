@@ -1,0 +1,1 @@
+Under --word-match and --case-sensitive, a search term whose case matches is found.

@@ -1,0 +1,4 @@
+>entry a long entry
+body of the long entry
+\include{included}
+text after the include directive

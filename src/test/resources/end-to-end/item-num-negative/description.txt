@@ -1,0 +1,1 @@
+A negative --item-num is diagnosed, like --item-num=0.

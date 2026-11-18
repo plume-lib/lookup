@@ -1,0 +1,12 @@
+>entry alpha, a long entry
+first paragraph of the alpha body
+
+second paragraph of the alpha body
+<entry
+
+>entry beta, another long entry
+Name: Bob
+<entry
+
+a short entry
+Name: Carol

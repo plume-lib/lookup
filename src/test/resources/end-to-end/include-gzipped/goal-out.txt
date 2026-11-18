@@ -1,0 +1,10 @@
+3 matches found (separated by dashes below)
+
+-------------------------
+entry in the root file
+
+-------------------------
+first entry in the compressed file
+
+-------------------------
+second entry in the compressed file

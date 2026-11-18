@@ -1,0 +1,2 @@
+Multiple --word-match keywords are conjoined: "bar" is a whole word only in entry one, and "here"
+is a whole word in entries one and three, so only entry one matches.

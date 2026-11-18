@@ -1,0 +1,8 @@
+2 matches found (separated by dashes below)
+
+-------------------------
+start of entry one 
+end of entry one
+
+-------------------------
+entry two
